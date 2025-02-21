@@ -2,17 +2,18 @@
 //
 #include <iostream>
 #include "Board.h"
-
-using namespace std;
+#include "Move.h"
 
 int main()
 {
 	Board board;
 	board.setStartingPosition();
+	board.setPositionFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	board.printBoard();
-	board.printAllBoards();
-	cout << "Hello World!\n";
-
+	Move move(B1,C3,KNIGHT);
+	Move move2(B1, C3, KNIGHT);
+	std::cout << (move == move2) << "\n";
+	std::cout << move.toString() << "\n";
 	return 0;
 }
 
