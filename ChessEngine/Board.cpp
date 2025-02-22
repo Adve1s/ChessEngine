@@ -43,7 +43,7 @@ void Board::setPositionFromFEN(const std::string& fen) {
 
 	int square = 56; // Start at a8
 
-	for (char c : boardStr) {
+	for (const char c : boardStr) {
 		if (c == '/') {
 			square -= 16; // Move down a rank and back to a-file
 		}
@@ -52,8 +52,8 @@ void Board::setPositionFromFEN(const std::string& fen) {
 		}
 		else {
 			// Place a piece
-			Color color = (c >= 'a') ? BLACK : WHITE;
-			Bitboard squareBit = 1ULL << square;
+			const Color color = (c >= 'a') ? BLACK : WHITE;
+			const Bitboard squareBit = 1ULL << square;
 
 			switch (std::toupper(c)) {
 			case 'K': m_pieceBitboards[color][KING] |= squareBit; break;
@@ -96,20 +96,23 @@ void Board::updateCachedBitboards()
 	}
 }
 
-bool Board::isSquareEmpty(int square) const
+bool Board::isSquareEmpty(const int square) const
 {
-	Bitboard squareMask = 1ULL << square;
+	const Bitboard squareMask = 1ULL << square;
 	return !(m_occupiedSquares & squareMask);
 }
 
-bool Board::isSquareOccupiedBy(int square, Color color) const
+bool Board::isSquareOccupiedBy(const int square,const Color color) const
 {
-	Bitboard squareMask = 1ULL << square;
+	const Bitboard squareMask = 1ULL << square;
 	return (m_colorPieces[color] & squareMask);
 }
 
+
+
+
 // Get the least significant bit position (first set bit)
-static int getLSBIndex(Bitboard board) {
+int Board::getLSBIndex(const Bitboard board) {
 	if (board == 0) return -1;
 	unsigned long index;
 	_BitScanForward64(&index, board);
@@ -118,7 +121,7 @@ static int getLSBIndex(Bitboard board) {
 }
 
 // Get and clear the least significant bit
-static int popLSB(Bitboard& board) {
+int Board::popLSB(Bitboard& board) {
 	if (board == 0) return -1;
 
 	unsigned long index;
@@ -129,11 +132,6 @@ static int popLSB(Bitboard& board) {
 	board &= (board - 1);
 
 	return static_cast<int>(index);
-}
-
-// Count the number of set bits (pieces on the board)
-static int countBits(Bitboard board) {
-	return static_cast<int>(__popcnt64(board));
 }
 
 void Board::printBoard() const
@@ -149,8 +147,8 @@ void Board::printBoard() const
 		std::cout << (rank + 1) << " | ";
 
 		for (int file = 0; file < 8; ++file) {
-			int square = rank * 8 + file;
-			uint64_t squareMask = 1ULL << square;
+			const int square = rank * 8 + file;
+			const uint64_t squareMask = 1ULL << square;
 			bool pieceFound = false;
 
 			// Check each piece bitboard for this square
@@ -184,7 +182,7 @@ void Board::printSingleBoard(const Bitboard& board)
 {
 	for (int rank = 7; rank >= 0; --rank) {
 		for (int file = 0; file < 8; ++file) {
-			int square = rank * 8 + file;
+			const int square = rank * 8 + file;
 			std::cout << ((board >> square) & 1) << " ";
 		}
 		std::cout << "\n";
@@ -192,7 +190,7 @@ void Board::printSingleBoard(const Bitboard& board)
 	std::cout << "\n";
 }
 
-void Board::printAllBoards()
+void Board::printAllBoards() const
 {
 	for (auto& playerBoards : m_pieceBitboards) {
 		for (auto& pieceBoard : playerBoards) {

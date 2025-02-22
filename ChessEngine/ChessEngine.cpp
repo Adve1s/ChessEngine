@@ -10,6 +10,7 @@ int main()
 	board.setStartingPosition();
 	board.setPositionFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 	board.printBoard();
+	board.printAllBoards();
 	Move move(B1,C3,KNIGHT);
 	Move move2(B1, C3, KNIGHT);
 	std::cout << (move == move2) << "\n";

@@ -2,7 +2,7 @@
 #include <sstream>
 
 // Constructor with basic move information
-Move::Move(int fromSquare, int toSquare, PieceType piece) :
+Move::Move(const int fromSquare, const int toSquare, const PieceType piece) :
 	m_data((fromSquare & 0x3F) |						// Store from square in bits 0-5
 		((toSquare & 0x3F) << 6) |						// Store to square in bits 6-11
 		((static_cast<uint32_t>(piece) & 0x7) << 12) |	// Store piece type in bits 12-14
@@ -13,7 +13,7 @@ Move::Move(int fromSquare, int toSquare, PieceType piece) :
 }
 
 // Constructor for captures
-Move::Move(int fromSquare, int toSquare, PieceType piece, PieceType capturedPiece) :
+Move::Move(const int fromSquare, const int toSquare, const PieceType piece, const PieceType capturedPiece) :
 	m_data((fromSquare & 0x3F) |								// Store from square in bits 0-5
 		((toSquare & 0x3F) << 6) |								// Store to square in bits 6-11
 		((static_cast<uint32_t>(piece) & 0x7) << 12) |			// Store piece type in bits 12-14
@@ -25,7 +25,7 @@ Move::Move(int fromSquare, int toSquare, PieceType piece, PieceType capturedPiec
 }
 
 // Constructor for promotions
-Move::Move(int fromSquare, int toSquare, PieceType fromPiece, PieceType toPiece, bool isCapture, PieceType capturedPiece) :
+Move::Move(const int fromSquare, const int toSquare, const PieceType fromPiece, const PieceType toPiece, const bool isCapture, const PieceType capturedPiece) :
 	m_data((fromSquare & 0x3F) |													// Store from square in bits 0-5
 		((toSquare & 0x3F) << 6) |													// Store to square in bits 6-11
 		((static_cast<uint32_t>(fromPiece) & 0x7) << 12) |							// Store piece type in bits 12-14
@@ -51,7 +51,7 @@ bool Move::operator==(const Move& other) const {
 			getPromotionPiece() == other.getPromotionPiece()));
 }
 
-void Move::setType(MoveType type, PieceType capturedPiece, PieceType promotionPiece)
+void Move::setType(const MoveType type, const PieceType capturedPiece, const PieceType promotionPiece)
 {
 	// Clear the old move type bits (bits 18-20)
 	m_data &= ~(0x7u << 18);
@@ -72,7 +72,7 @@ void Move::setType(MoveType type, PieceType capturedPiece, PieceType promotionPi
 	m_data |= ((static_cast<uint32_t>(promotionPiece) & 0x7) << 21);
 
 	// Flag patterns for each move type (positioned at bits 24-26)
-	static const uint32_t flagPatterns[8] = {
+	static constexpr uint32_t FLAG_PATTERNS[8] = {
 		0,                  // NORMAL
 		1 << 24,            // CAPTURE (capture flag)
 		0,                  // PAWN_TWO_FORWARD
@@ -84,7 +84,7 @@ void Move::setType(MoveType type, PieceType capturedPiece, PieceType promotionPi
 	};
 
 	// Set the flags
-	m_data |= flagPatterns[type];
+	m_data |= FLAG_PATTERNS[type];
 }
 
 // Convert move to string for output
@@ -161,12 +161,6 @@ std::string Move::toString() const
 	case PROMOTION_CAPTURE:
 		ss << " (promotion with capture)";
 		break;
-	case KINGSIDE_CASTLE:
-		// Already handled earlier
-		break;
-	case QUEENSIDE_CASTLE:
-		// Already handled earlier
-		break;
 	default:
 		break;
 	}
@@ -175,10 +169,10 @@ std::string Move::toString() const
 }
 
 // Convert a square number (0-63) to algebraic notation (a1, h8, etc.)
-std::string squareToString(int square)
+std::string squareToString(const int square)
 {
-	char file = 'a' + (square % 8);    // Horizontal position (a-h)
-	char rank = '1' + (square / 8);    // Vertical position (1-8)
+	const char file = 'a' + (square % 8);    // Horizontal position (a-h)
+	const char rank = '1' + (square / 8);    // Vertical position (1-8)
 
 	return std::string(1, file) + std::string(1, rank);
 }
@@ -190,8 +184,8 @@ int stringToSquare(const std::string& squareStr)
 		return -1; // Invalid square string
 	}
 
-	int file = squareStr[0] - 'a';
-	int rank = squareStr[1] - '1';
+	const int file = squareStr[0] - 'a';
+	const int rank = squareStr[1] - '1';
 
 	if (file < 0 || file > 7 || rank < 0 || rank > 7) {
 		return -1; // Invalid coordinates

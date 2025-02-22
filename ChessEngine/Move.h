@@ -38,12 +38,15 @@ public:
 	PieceType getCapturedPiece() const { return static_cast<PieceType>((m_data >> 15) & 0x7); }
 	PieceType getPromotionPiece() const { return static_cast<PieceType>((m_data >> 21) & 0x7); }
 
-	// Check if this is a capture move
-	bool isCapture() const { return (m_data >> 24) & 1; }
-	// Check if this is a promotion move
-	bool isPromotion() const { return (m_data >> 25) & 1; }
-	// Check if this is a castling move
-	bool isCastling() const { return (m_data >> 26) & 1; }
+	// Object-oriented methods (for working with Move objects)
+	bool isCapture() const { return isCaptureFlag(m_data); }
+	bool isPromotion() const { return isPromotionFlag(m_data); }
+	bool isCastling() const { return isCastlingFlag(m_data); }
+
+	// Static utility methods (for working with raw move data)
+	static bool isCaptureFlag(const uint32_t moveData) { return (moveData >> 24) & 1; }
+	static bool isPromotionFlag(const uint32_t moveData) { return (moveData >> 25) & 1; }
+	static bool isCastlingFlag(const uint32_t moveData) { return (moveData >> 26) & 1; }
 
 	bool operator==(const Move& other) const;
 	bool operator!=(const Move& other) const {return !(*this == other);}
@@ -65,5 +68,5 @@ private:
 	uint32_t m_data;
 };
 // Helper functions - declared here, defined in cpp file
-std::string squareToString(int square);
+std::string squareToString(const int square);
 int stringToSquare(const std::string& squareStr);

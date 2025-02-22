@@ -33,15 +33,19 @@ public:
 	void setStartingPosition();
 	void setPositionFromFEN(const std::string& fen);
 	void updateCachedBitboards();
-	bool isSquareEmpty(int square) const;
-	bool isSquareOccupiedBy(int square, Color color) const;
-	static Bitboard squareToBitboard(int square) {return 1ULL << square;}
-	static int getLSBIndex(Bitboard board);
-	static int popLSB(Bitboard& board);
-	static int countBits(Bitboard board);
+
+	// Non-static methods - these need access to the board's state
+	bool isSquareEmpty(const int square) const;
+	bool isSquareOccupiedBy(const int square, const Color color) const;
 	void printBoard() const;
+	void printAllBoards() const;
+
+	// Static methods - these are utility functions that don't need board state
+	static Bitboard squareToBitboard(const int square) { return 1ULL << square; }
+	static int getLSBIndex(const Bitboard board);
+	static int popLSB(Bitboard& board);
+	static int countBits(const Bitboard board) { return static_cast<int>(__popcnt64(board)); }
 	static void printSingleBoard(const Bitboard& board);
-	void printAllBoards();
 
 private:
 	Bitboard m_pieceBitboards[2][6]{}; // 2 players, 6 piece types
