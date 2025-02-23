@@ -9,16 +9,13 @@
 int main()
 {
 	init();
-	Position pos1;
-	Bitboard board = 0;
-	setBit(board, A1);
-	printBitBoard(board);
-	std::cout << stringToSquare("a1") << "\n";
-	std::cout << squareToString(A2) << "\n";
-	Move move(B1,C3,KNIGHT);
-	Move move2(B1, C3, KNIGHT);
-	std::cout << (move == move2) << "\n";
-	std::cout << move.toString() << "\n";
+	printBitBoard(g_pawnAttacks[WHITE][A1]);
+	printBitBoard(g_pawnAttacks[BLACK][A1]);
+	printBitBoard(g_pseudoAttacks[KNIGHT][A1]);
+	printBitBoard(g_pseudoAttacks[BISHOP][A1]);
+	printBitBoard(g_pseudoAttacks[ROOK][A1]);
+	printBitBoard(g_pseudoAttacks[QUEEN][A1]);
+	printBitBoard(g_pseudoAttacks[KING][A1]);
 	return 0;
 }
 

@@ -96,8 +96,8 @@ std::string Move::toString() const
 	std::stringstream ss;
 
 	// Get the square names
-	std::string fromStr = squareToString(getFrom());
-	std::string toStr = squareToString(getTo());
+	std::string fromStr = squareToString(A1); //----------------------------------------------------------------------
+	std::string toStr = squareToString(A2);
 
 	// Piece letter (using standard notation: K, Q, R, B, N for pieces, nothing for pawns)
 	std::string pieceStr;

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <cassert>
 
 namespace chess {
 
@@ -7,13 +8,15 @@ namespace chess {
 	using Bitboard = uint64_t;
 
 	// Piece types
-	enum PieceType {
+	enum PieceType : int
+	{
 		NO_PIECE_TYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING,
 		ALL_PIECES = 0,
 		PIECE_TYPE_NB = 8
 	};
 
-	enum Piece {
+	enum Piece : int
+	{
 		NO_PIECE,      // = 0 (first enum value defaults to 0)
 
 		// White pieces start at PAWN's value (1)
@@ -37,7 +40,7 @@ namespace chess {
 	};
 
 	// Player colors
-	enum Color : uint8_t
+	enum Color : int
 	{
 		WHITE,
 		BLACK,
@@ -46,7 +49,7 @@ namespace chess {
 	};
 
 	// Square identifiers (0-63, plus NO_SQUARE)
-	enum Square : uint8_t
+	enum Square : int
 	{
 		A1, B1, C1, D1, E1, F1, G1, H1,
 		A2, B2, C2, D2, E2, F2, G2, H2,
@@ -62,7 +65,7 @@ namespace chess {
 	};
 
 	// Move types
-	enum MoveType : uint8_t
+	enum MoveType : int
 	{
 		NORMAL = 0,             // Regular move
 		CAPTURE = 1,            // Capturing an opponent's piece
@@ -76,7 +79,7 @@ namespace chess {
 	};
 
 	// Directions for sliding pieces and move generation
-	enum Direction : int8_t
+	enum Direction : int
 	{
 		NORTH = 8,
 		EAST = 1,
@@ -89,13 +92,13 @@ namespace chess {
 	};
 
 	// File identifiers (0-7)
-	enum File : uint8_t
+	enum File : int
 	{
 		FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H, FILE_NB
 	};
 
 	// Rank identifiers (0-7)
-	enum Rank : uint8_t
+	enum Rank : int
 	{
 		RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NB
 	};
@@ -105,12 +108,14 @@ namespace chess {
 	constexpr int MAX_GAME_LENGTH = 246;  // Maximum number of half-moves in a game
 
 	// Utility functions
+	constexpr bool isSquare(const Square s) {return s >= SQUARE_ZERO && s < NO_SQUARE;}
 	inline File fileOf(const Square sq) { return File(sq & 7); }
 	inline Rank rankOf(const Square sq) { return Rank(sq >> 3); }
 	inline Square makeSquare(const File f, const Rank r) { return Square((r << 3) | f); }
 
 	// Castling rights (can be combined with bitwise OR)
-	enum CastlingRights {
+	enum CastlingRights : int
+	{
 		NO_CASTLING,									// 0000
 		WHITE_OO,									    // 0001
 		WHITE_OOO = WHITE_OO << 1,						// 0010
@@ -125,5 +130,11 @@ namespace chess {
 
 		CASTLING_RIGHT_NB = 16
 	};
+
+#define ENABLE_INCR_OPERATORS_ON(T) \
+    inline T& operator++(T& d) { return d = T(int(d) + 1); } \
+    inline T& operator--(T& d) { return d = T(int(d) - 1); }
+
+	ENABLE_INCR_OPERATORS_ON(Square)
 
 }

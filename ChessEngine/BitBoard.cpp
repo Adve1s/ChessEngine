@@ -7,24 +7,48 @@ namespace chess {
 	Bitboard g_throughBB[SQUARE_NB][SQUARE_NB];
 	Bitboard g_pseudoAttacks[PIECE_TYPE_NB][SQUARE_NB];
 	Bitboard g_pawnAttacks[COLOR_NB][SQUARE_NB];
+	uint8_t g_squareDistance[SQUARE_NB][SQUARE_NB];
 
 	void init() {
-		for (int sq = A1; A1 > SQUARE_NB; ++sq) {
-			g_pseudoAttacks[KNIGHT][sq] = 0;
-			g_pseudoAttacks[BISHOP][sq] = 0;
-			g_pseudoAttacks[ROOK][sq] = 0;
-			g_pseudoAttacks[QUEEN][sq] = 0;
-			g_pseudoAttacks[KING][sq] = 0;
+		for (Square sq1 = A1; sq1 < SQUARE_NB; ++sq1) 
+			for (Square sq2 = A1; sq2 < SQUARE_NB; ++sq2) 
+				g_squareDistance[sq1][sq2] = std::max(distance<File>(sq1, sq2),distance<Rank>(sq1, sq2));
 
-			g_pawnAttacks[WHITE][sq] = 0;
-			g_pawnAttacks[BLACK][sq] = 0;
-		}
-		for (int sq1 = A1; sq1 < SQUARE_NB; ++sq1) {
-			for (int sq2 = A1; sq2 < SQUARE_NB; ++sq2) {
-				g_betweenBB[sq1][sq2] = 0;    // Will contain squares between sq1 and sq2
-				g_throughBB[sq1][sq2] = 0;     // Will contain line through sq1 and sq2
+		for (Square sq = A1; sq < SQUARE_NB; ++sq) {
+			const File f = fileOf(sq);
+			const Rank r = rankOf(sq);
+			g_pseudoAttacks[ROOK][sq] = (FILE_MASK_A << f | RANK_MASK_1 << (8 * r)) & ~squareToBB(sq);
+			for (const Direction d : {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST})
+			{
+				Square temp = sq;
+				while (const Bitboard next = insideBoard(temp, d)) {
+					g_pseudoAttacks[BISHOP][sq] |= next;
+					temp = Square(temp + d);
+				}
 			}
+
+			g_pseudoAttacks[QUEEN][sq] |= g_pseudoAttacks[BISHOP][sq]| g_pseudoAttacks[ROOK][sq];
+
+			for (const int step : {-17, -15, -10, -6, 6, 10, 15, 17})
+				g_pseudoAttacks[KNIGHT][sq] |= insideBoard(sq,step);
+
+			for (const int step : {-9, -8, -7, -1, 1, 7, 8, 9})
+				g_pseudoAttacks[KING][sq] |= insideBoard(sq, step);
+
+			g_pawnAttacks[WHITE][sq] |= pawnAttack<WHITE>(sq);
+			g_pawnAttacks[BLACK][sq] |= pawnAttack<BLACK>(sq);
 		}
+	}
+
+	Bitboard insideBoard(const Square square, const int step) {
+		Square to = Square(square + step);
+		if (!isSquare(to)) {
+			return Bitboard(0);
+		}
+		if (distance<Square>(square, to) <= 2) {
+			return squareToBB(to);
+		}
+		return Bitboard(0);
 	}
 
 	// Print a visual representation of a single bitboard
@@ -58,12 +82,22 @@ namespace chess {
 	}
 
 	// Convert a square number to algebraic notation (e.g., 0 -> "a1")
-	std::string squareToString(const int square) {
-		if (square >= SQUARE_NB) return "-";
-		// File is the remainder when divided by 8 (0-7 -> a-h)
-		const char file = 'a' + (square % 8);
-		// Rank is the quotient when divided by 8 plus 1 (0-7 -> 1-8)
-		const char rank = '1' + (square / 8);
-		return std::string(1, file) + std::string(1, rank);
+	std::string squareToString(const Square square) {
+		// Check if it's a valid square
+		if (square == NO_SQUARE)
+			return "none";
+
+		// Convert square to file and rank
+		File file = fileOf(square);   // Gets 0-7 for files a-h
+		Rank rank = rankOf(square);   // Gets 0-7 for ranks 1-8
+
+		// Create the string:
+		// - File is converted to char by adding 'a' (e.g., 0 -> 'a', 1 -> 'b')
+		// - Rank is converted to char by adding '1' (e.g., 0 -> '1', 1 -> '2')
+		std::string result;
+		result += char('a' + file);  // Convert file number to letter
+		result += char('1' + rank);  // Convert rank number to digit
+
+		return result;
 	}
 }
