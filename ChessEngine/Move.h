@@ -1,19 +1,8 @@
 #pragma once
-#include "Board.h"
 #include <string>
+#include "types.h"
 
-// A more detailed enum to describe the type of move
-enum MoveType : uint8_t
-{
-	NORMAL = 0,             // Regular move
-	CAPTURE = 1,            // Capturing an opponent's piece
-	PAWN_TWO_FORWARD = 2,   // Pawn's initial two-square move
-	KINGSIDE_CASTLE = 3,    // King castling to the kingside
-	QUEENSIDE_CASTLE = 4,   // King castling to the queenside
-	EN_PASSANT = 5,         // En passant capture
-	PROMOTION = 6,          // Pawn promotion
-	PROMOTION_CAPTURE = 7   // Pawn promotion with capture
-};
+using namespace chess;
 
 class Move
 {
@@ -22,13 +11,13 @@ public:
 	Move() : m_data(0) {}
 
 	// Constructor with basic move information
-	Move(int fromSquare, int toSquare, PieceType piece);
+	Move(Square fromSquare, Square toSquare, PieceType piece);
 
 	// Constructor for captures
-	Move(int fromSquare, int toSquare, PieceType piece, PieceType capturedPiece);
+	Move(Square fromSquare, Square toSquare, PieceType piece, PieceType capturedPiece);
 
 	// Constructor for promotions
-	Move(int fromSquare, int toSquare, PieceType fromPiece, PieceType toPiece, bool isCapture = false, PieceType capturedPiece = NO_PIECE_TYPE);
+	Move(Square fromSquare, Square toSquare, PieceType fromPiece, PieceType toPiece, bool isCapture = false, PieceType capturedPiece = NO_PIECE_TYPE);
 
 	// Getters
 	int getFrom() const { return m_data & 0x3F; }
@@ -67,6 +56,3 @@ private:
 	// bits 24-31: reserved for future use
 	uint32_t m_data;
 };
-// Helper functions - declared here, defined in cpp file
-std::string squareToString(const int square);
-int stringToSquare(const std::string& squareStr);

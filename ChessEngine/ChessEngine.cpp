@@ -1,16 +1,20 @@
 // ChessEngine.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include <iostream>
-#include "Board.h"
 #include "Move.h"
+#include "types.h"
+#include "Position.h"
+#include "BitBoard.h"
 
 int main()
 {
-	Board board;
-	board.setStartingPosition();
-	board.setPositionFromFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	board.printBoard();
-	board.printAllBoards();
+	init();
+	Position pos1;
+	Bitboard board = 0;
+	setBit(board, A1);
+	printBitBoard(board);
+	std::cout << stringToSquare("a1") << "\n";
+	std::cout << squareToString(A2) << "\n";
 	Move move(B1,C3,KNIGHT);
 	Move move2(B1, C3, KNIGHT);
 	std::cout << (move == move2) << "\n";
@@ -18,6 +22,7 @@ int main()
 	return 0;
 }
 
+//"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" FEN string for starting position
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu

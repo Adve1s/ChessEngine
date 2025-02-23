@@ -1,8 +1,11 @@
 #include "Move.h"
 #include <sstream>
+#include "BitBoard.h"
+using namespace chess;
+ 
 
 // Constructor with basic move information
-Move::Move(const int fromSquare, const int toSquare, const PieceType piece) :
+Move::Move(const Square fromSquare, const Square toSquare, const PieceType piece) :
 	m_data((fromSquare & 0x3F) |						// Store from square in bits 0-5
 		((toSquare & 0x3F) << 6) |						// Store to square in bits 6-11
 		((static_cast<uint32_t>(piece) & 0x7) << 12) |	// Store piece type in bits 12-14
@@ -13,7 +16,7 @@ Move::Move(const int fromSquare, const int toSquare, const PieceType piece) :
 }
 
 // Constructor for captures
-Move::Move(const int fromSquare, const int toSquare, const PieceType piece, const PieceType capturedPiece) :
+Move::Move(const Square fromSquare, const Square toSquare, const PieceType piece, const PieceType capturedPiece) :
 	m_data((fromSquare & 0x3F) |								// Store from square in bits 0-5
 		((toSquare & 0x3F) << 6) |								// Store to square in bits 6-11
 		((static_cast<uint32_t>(piece) & 0x7) << 12) |			// Store piece type in bits 12-14
@@ -25,7 +28,7 @@ Move::Move(const int fromSquare, const int toSquare, const PieceType piece, cons
 }
 
 // Constructor for promotions
-Move::Move(const int fromSquare, const int toSquare, const PieceType fromPiece, const PieceType toPiece, const bool isCapture, const PieceType capturedPiece) :
+Move::Move(const Square fromSquare, const Square toSquare, const PieceType fromPiece, const PieceType toPiece, const bool isCapture, const PieceType capturedPiece) :
 	m_data((fromSquare & 0x3F) |													// Store from square in bits 0-5
 		((toSquare & 0x3F) << 6) |													// Store to square in bits 6-11
 		((static_cast<uint32_t>(fromPiece) & 0x7) << 12) |							// Store piece type in bits 12-14
@@ -166,30 +169,4 @@ std::string Move::toString() const
 	}
 
 	return ss.str();
-}
-
-// Convert a square number (0-63) to algebraic notation (a1, h8, etc.)
-std::string squareToString(const int square)
-{
-	const char file = 'a' + (square % 8);    // Horizontal position (a-h)
-	const char rank = '1' + (square / 8);    // Vertical position (1-8)
-
-	return std::string(1, file) + std::string(1, rank);
-}
-
-// Convert algebraic notation to a square number
-int stringToSquare(const std::string& squareStr)
-{
-	if (squareStr.length() < 2) {
-		return -1; // Invalid square string
-	}
-
-	const int file = squareStr[0] - 'a';
-	const int rank = squareStr[1] - '1';
-
-	if (file < 0 || file > 7 || rank < 0 || rank > 7) {
-		return -1; // Invalid coordinates
-	}
-
-	return rank * 8 + file;
 }
