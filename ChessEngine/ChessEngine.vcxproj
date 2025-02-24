@@ -128,12 +128,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BitBoard.cpp" />
+    <ClCompile Include="BitBoardTests.cpp" />
     <ClCompile Include="ChessEngine.cpp" />
     <ClCompile Include="Move.cpp" />
     <ClCompile Include="Position.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BitBoard.h" />
+    <ClInclude Include="BitBoardTests.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Move.h" />
     <ClInclude Include="Position.h" />

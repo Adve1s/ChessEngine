@@ -9,11 +9,55 @@ namespace chess {
 	Bitboard g_pawnAttacks[COLOR_NB][SQUARE_NB];
 	uint8_t g_squareDistance[SQUARE_NB][SQUARE_NB];
 
-	void init() {
-		for (Square sq1 = A1; sq1 < SQUARE_NB; ++sq1) 
-			for (Square sq2 = A1; sq2 < SQUARE_NB; ++sq2) 
-				g_squareDistance[sq1][sq2] = std::max(distance<File>(sq1, sq2),distance<Rank>(sq1, sq2));
+	void init()
+	{
+		initSquareDistance();
+		initBetweenThroughBB();
+		initAttackBB();
+	}
 
+	void initSquareDistance()
+	{
+		for (Square sq1 = A1; sq1 < SQUARE_NB; ++sq1)
+			for (Square sq2 = A1; sq2 < SQUARE_NB; ++sq2)
+				g_squareDistance[sq1][sq2] = std::max(distance<File>(sq1, sq2), distance<Rank>(sq1, sq2));
+	}
+
+	void initBetweenThroughBB()
+	{
+		for (Square sq1 = A1; sq1 < SQUARE_NB; ++sq1) {
+			for (Square sq2 = A1; sq2 < SQUARE_NB; ++sq2) {
+				const int dist = distance<Square>(sq1, sq2);
+				g_throughBB[sq1][sq2] |= squareToBB(sq1);
+				if (!dist) {
+					continue;
+				}
+				Direction dirs[2] = { };
+				dirs[0] = getDirection(sq1, sq2);
+				dirs[1] = getDirection(sq2, sq1);
+				if (dirs[0] == Direction(0)) {
+					g_throughBB[sq1][sq2] = Bitboard(0);
+					g_betweenBB[sq1][sq2] |= squareToBB(sq2);
+					continue;
+				}
+				Square temp = sq1;
+				for (int num = 0; num < dist - 1; ++num) {
+					g_betweenBB[sq1][sq2] |= insideBoard(temp, dirs[0]);
+					temp = Square(temp + dirs[0]);
+				}
+				for (const auto& d : dirs) {
+					temp = sq1;
+					while (const Bitboard next = insideBoard(temp, d)) {
+						g_throughBB[sq1][sq2] |= next;
+						temp = Square(temp + d);
+					}
+				}
+			}
+		}
+	}
+
+	void initAttackBB()
+	{
 		for (Square sq = A1; sq < SQUARE_NB; ++sq) {
 			const File f = fileOf(sq);
 			const Rank r = rankOf(sq);
@@ -27,10 +71,10 @@ namespace chess {
 				}
 			}
 
-			g_pseudoAttacks[QUEEN][sq] |= g_pseudoAttacks[BISHOP][sq]| g_pseudoAttacks[ROOK][sq];
+			g_pseudoAttacks[QUEEN][sq] |= g_pseudoAttacks[BISHOP][sq] | g_pseudoAttacks[ROOK][sq];
 
 			for (const int step : {-17, -15, -10, -6, 6, 10, 15, 17})
-				g_pseudoAttacks[KNIGHT][sq] |= insideBoard(sq,step);
+				g_pseudoAttacks[KNIGHT][sq] |= insideBoard(sq, step);
 
 			for (const int step : {-9, -8, -7, -1, 1, 7, 8, 9})
 				g_pseudoAttacks[KING][sq] |= insideBoard(sq, step);
@@ -40,7 +84,9 @@ namespace chess {
 		}
 	}
 
-	Bitboard insideBoard(const Square square, const int step) {
+	Bitboard insideBoard(const Square square, const int step)
+	{
+		assert(isSquare(square));
 		Square to = Square(square + step);
 		if (!isSquare(to)) {
 			return Bitboard(0);
@@ -51,8 +97,28 @@ namespace chess {
 		return Bitboard(0);
 	}
 
+	// Helper to determine the direction between two squares
+	Direction getDirection(const Square from,const Square to)
+	{
+		int fileDiff = fileOf(to) - fileOf(from);
+		int rankDiff = rankOf(to) - rankOf(from);
+
+		if (fileDiff == 0)
+			return rankDiff > 0 ? NORTH : SOUTH;
+		if (rankDiff == 0)
+			return fileDiff > 0 ? EAST : WEST;
+		if (abs(fileDiff) == abs(rankDiff)) {
+			if (rankDiff > 0)
+				return fileDiff > 0 ? NORTH_EAST : NORTH_WEST;
+			else
+				return fileDiff > 0 ? SOUTH_EAST : SOUTH_WEST;
+		}
+		return Direction(0);
+	}
+
 	// Print a visual representation of a single bitboard
-	void printBitBoard(const Bitboard board) {
+	void printBitBoard(const Bitboard board)
+	{
 		for (int rank = 7; rank >= 0; --rank) {
 			for (int file = 0; file < 8; ++file) {
 				const int square = rank * 8 + file;
@@ -64,7 +130,8 @@ namespace chess {
 	}
 
 	// Convert algebraic notation to a square number (e.g., "e4" -> 28)
-	int stringToSquare(const std::string& squareStr) {
+	int stringToSquare(const std::string& squareStr)
+	{
 		if (squareStr == "-") return NO_SQUARE;
 		if (squareStr.length() != 2) return NO_SQUARE;
 
@@ -82,11 +149,9 @@ namespace chess {
 	}
 
 	// Convert a square number to algebraic notation (e.g., 0 -> "a1")
-	std::string squareToString(const Square square) {
-		// Check if it's a valid square
-		if (square == NO_SQUARE)
-			return "none";
-
+	std::string squareToString(const Square square)
+	{
+		assert(isSquare(square));
 		// Convert square to file and rank
 		File file = fileOf(square);   // Gets 0-7 for files a-h
 		Rank rank = rankOf(square);   // Gets 0-7 for ranks 1-8

@@ -109,9 +109,9 @@ namespace chess {
 
 	// Utility functions
 	constexpr bool isSquare(const Square s) {return s >= SQUARE_ZERO && s < NO_SQUARE;}
-	inline File fileOf(const Square sq) { return File(sq & 7); }
-	inline Rank rankOf(const Square sq) { return Rank(sq >> 3); }
-	inline Square makeSquare(const File f, const Rank r) { return Square((r << 3) | f); }
+	constexpr File fileOf(const Square sq) { return File(sq & 7); }
+	constexpr Rank rankOf(const Square sq) { return Rank(sq >> 3); }
+	constexpr Square makeSquare(const File f, const Rank r) { return Square((r << 3) | f); }
 
 	// Castling rights (can be combined with bitwise OR)
 	enum CastlingRights : int

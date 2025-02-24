@@ -5,6 +5,9 @@
 namespace chess {
 
 	void init();
+	void initSquareDistance();
+	void initBetweenThroughBB();
+	void initAttackBB();
 
 	// Constants for file masks
 	constexpr Bitboard FILE_MASK_A = 0x0101010101010101ULL;
@@ -36,6 +39,9 @@ namespace chess {
 	extern uint8_t g_squareDistance[SQUARE_NB][SQUARE_NB];
 
 	Bitboard insideBoard(Square square,int step);
+
+	// Helper to determine the direction between two squares
+	Direction getDirection(Square from, Square to);
 
 	template<Color C>
 	constexpr Bitboard pawnAttack(const Square square) {
@@ -69,13 +75,13 @@ namespace chess {
 	}
 
 	// Query methods
-	inline bool isSquareEmpty(const Bitboard board, const Square square) {
+	constexpr bool isSquareEmpty(const Bitboard board, const Square square) {
 		assert(isSquare(square));
 		return !(board & (1ULL << square));
 	}
 
 	// Utility methods for bitboard manipulation
-	inline Bitboard squareToBB(const Square square) {
+	constexpr Bitboard squareToBB(const Square square) {
 		assert(isSquare(square));
 		return 1ULL << square;
 	}
@@ -115,5 +121,4 @@ namespace chess {
 	// Helper functions - declared here, defined in cpp file
 	std::string squareToString(Square square);
 	int stringToSquare(const std::string& squareStr);
-
 }
