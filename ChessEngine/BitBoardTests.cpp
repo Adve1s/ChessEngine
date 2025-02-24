@@ -1,15 +1,10 @@
 #include <iostream>
 #include "BitBoard.h"
 #include "BitBoardTests.h"
+#include "types.h"
 
 namespace chess {
 	namespace tests {
-
-		// Helper to report test results
-		void report(const std::string& testName, bool success) {
-			std::cout << (success ? "PASS: " : "FAIL: ") << testName << std::endl;
-		}
-
 		// Test basic bitboard operations
 		void testBasicOperations() {
 			// Test squareToBB
@@ -61,9 +56,9 @@ namespace chess {
 
 			// Test pop_lsb
 			b = squareToBB(C3) | squareToBB(F7);
-			Square s = pop_lsb(b);
+			Square s = popLsb(b);
 			success = (s == C3) && (b == squareToBB(F7));
-			s = pop_lsb(b);
+			s = popLsb(b);
 			success &= (s == F7) && (b == Bitboard(0));
 			report("pop_lsb function", success);
 
@@ -331,7 +326,7 @@ namespace chess {
 			success &= (RANK_MASK_1 == 0xFF);
 			success &= ((RANK_MASK_4 & FILE_MASK_E) == squareToBB(E4));
 
-			std::cout << (success ? "PASS: " : "FAIL: ") << "Mask bitboards" << std::endl;
+			std::cout << (success ? "PASS: " : "FAIL: ") << "Mask bitboards" << "\n";
 		}
 
 		void testInsideBoard() {
@@ -357,7 +352,7 @@ namespace chess {
 			success &= (insideBoard(E4, 17) == squareToBB(F6)); // Knight move NNE
 			success &= (insideBoard(B2, -10) == 0); // Knight move would go off board
 
-			std::cout << (success ? "PASS: " : "FAIL: ") << "insideBoard function" << std::endl;
+			std::cout << (success ? "PASS: " : "FAIL: ") << "insideBoard function" << "\n";
 		}
 
 		// Test direction calculation
@@ -385,14 +380,14 @@ namespace chess {
 		void testPrintBitBoard() {
 			// Simple test to ensure function doesn't crash
 			Bitboard b = squareToBB(E4) | squareToBB(F5) | FILE_MASK_A | RANK_MASK_7;
-			std::cout << "Testing printBitBoard (visual inspection required, should be E4, F5, A file, 7 Rank):" << std::endl;
+			std::cout << "Testing printBitBoard (visual inspection required, should be E4, F5, A file, 7 Rank):" << "\n";
 			printBitBoard(b);
-			std::cout << "MANUAL CHECK: printBitBoard function" << std::endl;
+			std::cout << "MANUAL CHECK: printBitBoard function" << "\n";
 		}
 
 		// Run all tests
-		void runAllTests() {
-			std::cout << "Running BitBoard tests...\n" << std::endl;
+		void runAllBitBoardTests() {
+			std::cout << "Running BitBoard tests...\n" << "\n";
 
 			testBasicOperations();
 			testBitManipulation();
@@ -408,7 +403,7 @@ namespace chess {
 			testDirectionCalculation();
 			testPrintBitBoard();
 
-			std::cout << "\nBitBoard tests completed." << std::endl;
+			std::cout << "\nBitBoard tests completed." << "\n";
 		}
 
 	} // namespace tests

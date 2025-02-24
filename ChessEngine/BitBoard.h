@@ -103,7 +103,7 @@ namespace chess {
 	}
 
 	// Get and clear the least significant bit
-	inline Square pop_lsb(Bitboard& b) {
+	inline Square popLsb(Bitboard& b) {
 		assert(b);                    // Fail fast if empty
 		const Square s = Square(lsb(b));  // Reuse lsb() function
 		// (x & (x-1)) clears the least significant set bit

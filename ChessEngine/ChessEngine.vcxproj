@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,12 +131,16 @@
     <ClCompile Include="BitBoard.cpp" />
     <ClCompile Include="BitBoardTests.cpp" />
     <ClCompile Include="ChessEngine.cpp" />
+    <ClCompile Include="MagicBB.cpp" />
+    <ClCompile Include="MagicBBTests.cpp" />
     <ClCompile Include="Move.cpp" />
     <ClCompile Include="Position.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BitBoard.h" />
     <ClInclude Include="BitBoardTests.h" />
+    <ClInclude Include="MagicBB.h" />
+    <ClInclude Include="MagicBBTests.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Move.h" />
     <ClInclude Include="Position.h" />

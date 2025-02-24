@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <cassert>
+#include <iostream>
 
 namespace chess {
 
@@ -137,4 +138,10 @@ namespace chess {
 
 	ENABLE_INCR_OPERATORS_ON(Square)
 
+
+
+	// Helper to report test results
+	inline void report(const std::string& testName, bool success) {
+		std::cout << (success ? "PASS: " : "FAIL: ") << testName << "\n";
+	}
 }

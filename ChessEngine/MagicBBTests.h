@@ -1,9 +1,8 @@
-// BitBoardTests.h
 #pragma once
-
 namespace chess {
 	namespace tests {
-		void runAllBitBoardTests();
+		void runAllMagicBBTests();
 	} // namespace tests
 } // namespace chess
+
 

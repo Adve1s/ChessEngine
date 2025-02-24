@@ -1,16 +1,18 @@
 // ChessEngine.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 #include <iostream>
-#include "Move.h"
 #include "types.h"
-#include "Position.h"
+#include "Move.h"
 #include "BitBoard.h"
 #include "BitBoardTests.h"
+#include "MagicBB.h"
+#include "MagicBBTests.h"
 
 int main()
 {
 	init();
-	tests::runAllTests();
+	tests::runAllMagicBBTests();
+	tests::runAllBitBoardTests();
 	/***
 	printBitBoard(g_throughBB[D4][F6]);
 	printBitBoard(g_throughBB[F4][D4]);
