@@ -1,7 +1,6 @@
+#include "BitBoardTests.h"
 #include <iostream>
 #include "BitBoard.h"
-#include "BitBoardTests.h"
-#include "types.h"
 
 namespace chess {
 	namespace tests {
@@ -29,13 +28,13 @@ namespace chess {
 			clearBit(b, E4);
 			success &= (b == squareToBB(F5));
 			clearBit(b, F5);
-			success &= (b == Bitboard(0));
+			success &= (b == Bitboard{ 0 });
 
 			report("setBit/clearBit", success);
 
 			// Test isSquareEmpty
 			success = true;
-			Bitboard board = squareToBB(A1) | squareToBB(H8);
+			constexpr Bitboard board = squareToBB(A1) | squareToBB(H8);
 			success &= !isSquareEmpty(board, A1);
 			success &= !isSquareEmpty(board, H8);
 			success &= isSquareEmpty(board, E4);
@@ -112,7 +111,7 @@ namespace chess {
 			success &= (g_pawnAttacks[WHITE][A2] == (squareToBB(B3)));
 			success &= (g_pawnAttacks[WHITE][E4] == (squareToBB(D5) | squareToBB(F5)));
 			success &= (g_pawnAttacks[WHITE][H7] == (squareToBB(G8)));
-			success &= (g_pawnAttacks[WHITE][A8] == Bitboard(0));
+			success &= (g_pawnAttacks[WHITE][A8] == Bitboard{ 0 });
 
 			report("White pawn attacks", success);
 
@@ -121,7 +120,7 @@ namespace chess {
 			success &= (g_pawnAttacks[BLACK][A7] == (squareToBB(B6)));
 			success &= (g_pawnAttacks[BLACK][E5] == (squareToBB(D4) | squareToBB(F4)));
 			success &= (g_pawnAttacks[BLACK][H2] == (squareToBB(G1)));
-			success &= (g_pawnAttacks[BLACK][A1] == Bitboard(0));
+			success &= (g_pawnAttacks[BLACK][A1] == Bitboard{ 0 });
 
 			report("Black pawn attacks", success);
 		}
@@ -133,7 +132,7 @@ namespace chess {
 			bool success = true;
 
 			// Middle of board
-			Bitboard e4Knights = g_pseudoAttacks[KNIGHT][E4];
+			const Bitboard e4Knights = g_pseudoAttacks[KNIGHT][E4];
 			success &= (popCount(e4Knights) == 8);
 			success &= (e4Knights & squareToBB(D6)) != 0;
 			success &= (e4Knights & squareToBB(F6)) != 0;
@@ -147,7 +146,7 @@ namespace chess {
 			report("Knight attacks (middle)", success);
 
 			// Corner of board
-			Bitboard a1Knights = g_pseudoAttacks[KNIGHT][A1];
+			const Bitboard a1Knights = g_pseudoAttacks[KNIGHT][A1];
 			success = true;
 			success &= (popCount(a1Knights) == 2);
 			success &= (a1Knights & squareToBB(B3)) != 0;
@@ -163,7 +162,7 @@ namespace chess {
 			bool success = true;
 
 			// Middle of board
-			Bitboard e4King = g_pseudoAttacks[KING][E4];
+			const Bitboard e4King = g_pseudoAttacks[KING][E4];
 			success &= (popCount(e4King) == 8);
 
 			// Check each square the king can move to
@@ -179,7 +178,7 @@ namespace chess {
 			report("King attacks (middle)", success);
 
 			// Corner of board
-			Bitboard a1King = g_pseudoAttacks[KING][A1];
+			const Bitboard a1King = g_pseudoAttacks[KING][A1];
 			success = true;
 			success &= (popCount(a1King) == 3);
 			success &= (a1King & squareToBB(A2)) != 0;
@@ -195,14 +194,14 @@ namespace chess {
 
 			// Test rook attacks
 			bool success = true;
-			Bitboard e4Rook = g_pseudoAttacks[ROOK][E4];
+			const Bitboard e4Rook = g_pseudoAttacks[ROOK][E4];
 
 			// Check count - should be 14 squares (7 horizontal + 7 vertical, excluding E4)
 			success &= (popCount(e4Rook) == 14);
 
 			// Check ranks and files
-			Bitboard e4Rank = RANK_MASK_4 & ~squareToBB(E4);
-			Bitboard e4File = FILE_MASK_E & ~squareToBB(E4);
+			constexpr Bitboard e4Rank = RANK_MASK_4 & ~squareToBB(E4);
+			constexpr Bitboard e4File = FILE_MASK_E & ~squareToBB(E4);
 			success &= ((e4Rook & e4Rank) == e4Rank);
 			success &= ((e4Rook & e4File) == e4File);
 
@@ -210,7 +209,7 @@ namespace chess {
 
 			// Test bishop attacks
 			success = true;
-			Bitboard e4Bishop = g_pseudoAttacks[BISHOP][E4];
+			const Bitboard e4Bishop = g_pseudoAttacks[BISHOP][E4];
 
 			// There should be 13 squares a bishop can attack from E4
 			// (NE: 3, SE: 3, SW: 3, NW: 4)
@@ -226,7 +225,7 @@ namespace chess {
 
 			// Test queen attacks (combination of rook and bishop)
 			success = true;
-			Bitboard e4Queen = g_pseudoAttacks[QUEEN][E4];
+			const Bitboard e4Queen = g_pseudoAttacks[QUEEN][E4];
 			success &= (e4Queen == (e4Rook | e4Bishop));
 			success &= (popCount(e4Queen) == 27); // 14 rook + 13 bishop
 
@@ -271,13 +270,13 @@ namespace chess {
 			success = true;
 
 			// Should include all squares on the a1-h8 diagonal
-			for (Square s : {A1, B2, C3, D4, E5, F6, G7, H8}) {
+			for (const Square s : {A1, B2, C3, D4, E5, F6, G7, H8}) {
 				success &= (through & squareToBB(s)) != 0;
 			}
 
 			// H5 and D5, should be A5 to H5
 			through = g_throughBB[H5][D5];
-			for (Square s : {A5, B5, C5, D5, E5, F5, G5, H5}) {
+			for (const Square s : {A5, B5, C5, D5, E5, F5, G5, H5}) {
 				success &= (through & squareToBB(s)) != 0;
 			}
 
@@ -372,14 +371,14 @@ namespace chess {
 			success &= (getDirection(E4, B1) == SOUTH_WEST);
 
 			// Test invalid directions (when squares aren't aligned)
-			success &= (getDirection(E4, F6) == Direction(0));
+			success &= (getDirection(E4, F6) == Direction{ 0 });
 
 			report("Direction calculation", success);
 		}
 
 		void testPrintBitBoard() {
 			// Simple test to ensure function doesn't crash
-			Bitboard b = squareToBB(E4) | squareToBB(F5) | FILE_MASK_A | RANK_MASK_7;
+			constexpr Bitboard b = squareToBB(E4) | squareToBB(F5) | FILE_MASK_A | RANK_MASK_7;
 			std::cout << "Testing printBitBoard (visual inspection required, should be E4, F5, A file, 7 Rank):" << "\n";
 			printBitBoard(b);
 			std::cout << "MANUAL CHECK: printBitBoard function" << "\n";

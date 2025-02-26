@@ -1,6 +1,5 @@
 #pragma once
-#include "types.h"
-#include "BitBoard.h" 
+#include "Types.h"
 
 namespace chess {
 	struct Magic {

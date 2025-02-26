@@ -2,12 +2,13 @@
 #include <random>
 #include <stdexcept>
 #include <vector>
+#include "BitBoard.h"
 
 namespace chess {
 	Bitboard generateBishopMask(const Square sq)
 	{
 		Bitboard mask = 0;
-		Bitboard edges = FILE_MASK_A | FILE_MASK_H | RANK_MASK_1 | RANK_MASK_8;
+		constexpr Bitboard edges = FILE_MASK_A | FILE_MASK_H | RANK_MASK_1 | RANK_MASK_8;
 		for (const Direction d : {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST})
 		{
 			Square temp = sq;
@@ -15,7 +16,7 @@ namespace chess {
 				if (edges & next)
 					break;
 				mask |= next;
-				temp = Square(temp + d);
+				temp = static_cast<Square>(temp + d);
 			}
 		}
 		return mask;
@@ -36,7 +37,7 @@ namespace chess {
 				if (edge & next)
 					break;
 				mask |= next;
-				temp = Square(temp + d);
+				temp = static_cast<Square>(temp + d);
 			}
 		}
 		return mask;
@@ -51,7 +52,7 @@ namespace chess {
 				attacks |= next;
 				if (occupied & next)
 					break;
-				temp = Square(temp + d);
+				temp = static_cast<Square>(temp + d);
 			}
 		}
 		return attacks;
@@ -66,7 +67,7 @@ namespace chess {
 				attacks |= next;
 				if (occupied & next)
 					break;
-				temp = Square(temp + d);
+				temp = static_cast<Square>(temp + d);
 			}
 		}
 		return attacks;
@@ -84,9 +85,9 @@ namespace chess {
 	}
 
 	Bitboard findMagic(Square square, PieceType pieceType, int bits) {
-		Bitboard mask = (pieceType == BISHOP) ? generateBishopMask(square) : generateRookMask(square);
-		int maskBits = popCount(mask);
-		int occupancyCount = 1 <<maskBits;
+		const Bitboard mask = (pieceType == BISHOP) ? generateBishopMask(square) : generateRookMask(square);
+		const int maskBits = popCount(mask);
+		const int occupancyCount = 1 <<maskBits;
 
 		std::vector<Bitboard> occupancies(occupancyCount);
 		std::vector<Bitboard> attacks(occupancyCount);
@@ -109,19 +110,23 @@ namespace chess {
 		for (int attempt = 0; attempt < 10000000; attempt++) {
 			// Generate a candidate magic number with better properties
 			// Using multiple random numbers AND-ed gives sparser bit patterns
-			Bitboard magic = dist(gen) & dist(gen) & dist(gen);
+			const Bitboard magic = dist(gen) & dist(gen) & dist(gen);
 
 			// Ensure high bits have enough randomness (important for the shift operation)
 			if (popCount((mask * magic) >> 56) < 6) continue;
 
 			// Test this magic number
-			std::vector<Bitboard> usedAttacks(1 << bits, 0);
-			std::vector<bool> used(1 << bits, false);
+			//std::vector<Bitboard> usedAttacks(1 << bits, 0);
+			//std::vector<bool> used(1 << bits, false);
+
+			std::vector<Bitboard> usedAttacks(1ULL << bits, 0);
+			std::vector<bool> used(1ULL << bits, false);
+
 			bool failed = false;
 
 			for (int i = 0; i < occupancyCount && !failed; i++) {
 				// Calculate index using the magic number
-				Bitboard index = (occupancies[i] * magic) >> (64 - bits);
+				const Bitboard index = (occupancies[i] * magic) >> (64 - bits);
 
 				if (!used[index]) {
 					// New index

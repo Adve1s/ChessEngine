@@ -1,9 +1,10 @@
 #include "MagicBBTests.h"
-#include "MagicBB.h"
 #include <iostream>
 #include <vector>
 
-#include "types.h"
+#include "BitBoard.h"
+#include "MagicBB.h"
+#include "Types.h"
 
 // Run all tests
 namespace chess {
@@ -15,15 +16,15 @@ namespace chess {
 			bool bishopSuccess = true;
 
 			// Test center square (D4)
-			Bitboard centerBishop = generateBishopMask(D4);
+			const Bitboard centerBishop = generateBishopMask(D4);
 			bishopSuccess &= (popCount(centerBishop) == 9); // A bishop in the center should have 9 relevant squares
 
 			// Test corner square (H1)
-			Bitboard cornerBishop = generateBishopMask(H1);
+			const Bitboard cornerBishop = generateBishopMask(H1);
 			bishopSuccess &= (popCount(cornerBishop) == 6); // A bishop in the corner should have 6 relevant squares
 
 			// Test specific bits for a known position
-			Bitboard e4Bishop = generateBishopMask(E4);
+			const Bitboard e4Bishop = generateBishopMask(E4);
 			// Check if specific squares are set in the mask
 			bishopSuccess &= (e4Bishop & squareToBB(D3)) != 0; // Southwest
 			bishopSuccess &= (e4Bishop & squareToBB(F3)) != 0; // Southeast
@@ -44,15 +45,15 @@ namespace chess {
 			bool rookSuccess = true;
 
 			// Test center square (D4)
-			Bitboard centerRook = generateRookMask(D4);
+			const Bitboard centerRook = generateRookMask(D4);
 			rookSuccess &= (popCount(centerRook) == 10); // A rook in the center should have 10 relevant squares
 
 			// Test corner square (A1)
-			Bitboard cornerRook = generateRookMask(A1);
+			const Bitboard cornerRook = generateRookMask(A1);
 			rookSuccess &= (popCount(cornerRook) == 12); // A rook in the corner should have 12 relevant squares
 
 			// Test specific bits for a known position
-			Bitboard e4Rook = generateRookMask(E4);
+			const Bitboard e4Rook = generateRookMask(E4);
 			// Check if specific squares are set in the mask
 			rookSuccess &= (e4Rook & squareToBB(E3)) != 0; // South
 			rookSuccess &= (e4Rook & squareToBB(E5)) != 0; // North
@@ -85,8 +86,8 @@ namespace chess {
 
 			// Test bishop attacks on an empty board
 			// Center square (D4)
-			Bitboard emptyBoard = 0;
-			Bitboard d4BishopAttacks = generateBishopAttacks(D4, emptyBoard);
+			constexpr Bitboard emptyBoard = 0;
+			const Bitboard d4BishopAttacks = generateBishopAttacks(D4, emptyBoard);
 
 			// A bishop in D4 on an empty board should attack 13 squares
 			success &= (popCount(d4BishopAttacks) == 13);
@@ -107,7 +108,7 @@ namespace chess {
 			setBit(blockedBoard, C3); // Block the SW diagonal
 			setBit(blockedBoard, F6); // Block the NE diagonal
 
-			Bitboard d4BishopBlocked = generateBishopAttacks(D4, blockedBoard);
+			const Bitboard d4BishopBlocked = generateBishopAttacks(D4, blockedBoard);
 
 			success = true;
 			// Should include the blocking pieces, but not beyond
@@ -120,7 +121,7 @@ namespace chess {
 			report("Bishop attacks (with blocking pieces)", success);
 
 			// Test from corner
-			Bitboard a1BishopAttacks = generateBishopAttacks(A1, emptyBoard);
+			const Bitboard a1BishopAttacks = generateBishopAttacks(A1, emptyBoard);
 			success = true;
 			success &= (popCount(a1BishopAttacks) == 7); // A bishop in A1 attacks 7 squares
 			success &= (a1BishopAttacks & squareToBB(H8)) != 0; // Long diagonal
@@ -134,8 +135,8 @@ namespace chess {
 
 			// Test rook attacks on an empty board
 			// Center square (E4)
-			Bitboard emptyBoard = 0;
-			Bitboard e4RookAttacks = generateRookAttacks(E4, emptyBoard);
+			constexpr Bitboard emptyBoard = 0;
+			const Bitboard e4RookAttacks = generateRookAttacks(E4, emptyBoard);
 
 			// A rook in E4 on an empty board should attack 14 squares (7 horizontal + 7 vertical)
 			success &= (popCount(e4RookAttacks) == 14);
@@ -153,7 +154,7 @@ namespace chess {
 			setBit(blockedBoard, E2); // Block South
 			setBit(blockedBoard, G4); // Block East
 
-			Bitboard e4RookBlocked = generateRookAttacks(E4, blockedBoard);
+			const Bitboard e4RookBlocked = generateRookAttacks(E4, blockedBoard);
 
 			success = true;
 			// Should include the blocking pieces, but not beyond
@@ -165,7 +166,7 @@ namespace chess {
 			report("Rook attacks (with blocking pieces)", success);
 
 			// Test from corner
-			Bitboard a1RookAttacks = generateRookAttacks(A1, emptyBoard);
+			const Bitboard a1RookAttacks = generateRookAttacks(A1, emptyBoard);
 			success = true;
 			success &= (popCount(a1RookAttacks) == 14); // A rook in A1 attacks 14 squares
 			success &= (a1RookAttacks & squareToBB(A8)) != 0; // Full file
@@ -183,7 +184,7 @@ namespace chess {
 			// for this test since we're calculating its attacks
 			clearBit(complexBoard, A1);
 
-			Bitboard a1RookComplex = generateRookAttacks(A1, complexBoard);
+			const Bitboard a1RookComplex = generateRookAttacks(A1, complexBoard);
 
 			success = true;
 			success &= (popCount(a1RookComplex) == 4); // Only A2, A3, C1, and B1 should be attackable
@@ -202,19 +203,19 @@ namespace chess {
 			bool success = true;
 
 			// An empty board
-			Bitboard emptyBoard = 0;
+			constexpr Bitboard emptyBoard = 0;
 
 			// Center square (D4)
-			Bitboard d4BishopAttacks = generateBishopAttacks(D4, emptyBoard);
-			Bitboard d4RookAttacks = generateRookAttacks(D4, emptyBoard);
+			const Bitboard d4BishopAttacks = generateBishopAttacks(D4, emptyBoard);
+			const Bitboard d4RookAttacks = generateRookAttacks(D4, emptyBoard);
 
 			// Combined attacks should be the same as a queen's attacks
-			Bitboard d4QueenAttacks = d4BishopAttacks | d4RookAttacks;
+			const Bitboard d4QueenAttacks = d4BishopAttacks | d4RookAttacks;
 			success &= (popCount(d4QueenAttacks) == 27); // 13 bishop + 14 rook
 
 			// Should contain all rook and bishop attacks
-			Bitboard bishopSquares[4] = { squareToBB(C3), squareToBB(E5), squareToBB(C5), squareToBB(E3) };
-			Bitboard rookSquares[4] = { squareToBB(D1), squareToBB(D8), squareToBB(A4), squareToBB(H4) };
+			constexpr Bitboard bishopSquares[4] = { squareToBB(C3), squareToBB(E5), squareToBB(C5), squareToBB(E3) };
+			constexpr Bitboard rookSquares[4] = { squareToBB(D1), squareToBB(D8), squareToBB(A4), squareToBB(H4) };
 
 			for (int i = 0; i < 4; i++) {
 				success &= (d4QueenAttacks & bishopSquares[i]) != 0;
@@ -228,9 +229,9 @@ namespace chess {
 			setBit(blockedBoard, C3); // Block SW diagonal
 			setBit(blockedBoard, D2); // Block South
 
-			Bitboard d4BishopBlocked = generateBishopAttacks(D4, blockedBoard);
-			Bitboard d4RookBlocked = generateRookAttacks(D4, blockedBoard);
-			Bitboard d4QueenBlocked = d4BishopBlocked | d4RookBlocked;
+			const Bitboard d4BishopBlocked = generateBishopAttacks(D4, blockedBoard);
+			const Bitboard d4RookBlocked = generateRookAttacks(D4, blockedBoard);
+			const Bitboard d4QueenBlocked = d4BishopBlocked | d4RookBlocked;
 
 			success = true;
 			// Queen's attacks should include blocking pieces
@@ -247,44 +248,43 @@ namespace chess {
 			bool success = true;
 
 			// Test case 1: Simple mask with 3 bits set
-			Bitboard mask = squareToBB(A1) | squareToBB(B2) | squareToBB(C3);
-			int bitsInMask = popCount(mask);
+			constexpr Bitboard mask = squareToBB(A1) | squareToBB(B2) | squareToBB(C3);
+			const int bitsInMask = popCount(mask);
 
 			// Test index 0 (000) - No squares occupied
-			Bitboard occ0 = setOccupancy(0, bitsInMask, mask);
+			const Bitboard occ0 = setOccupancy(0, bitsInMask, mask);
 			success &= (occ0 == 0);
 
 			// Test index 7 (111) - All squares occupied
-			Bitboard occ7 = setOccupancy(7, bitsInMask, mask);
+			const Bitboard occ7 = setOccupancy(7, bitsInMask, mask);
 			success &= (occ7 == mask);
 
 			// Test index 5 (101) - A1 and C3 occupied, B2 empty
-			Bitboard occ5 = setOccupancy(5, bitsInMask, mask);
-			Bitboard expected = squareToBB(A1) | squareToBB(C3);
+			const Bitboard occ5 = setOccupancy(5, bitsInMask, mask);
+			constexpr Bitboard expected = squareToBB(A1) | squareToBB(C3);
 			success &= (occ5 == expected);
 
 			// Test with a bishop mask
-			Bitboard bishopMask = generateBishopMask(E4);
-			int bishopBits = popCount(bishopMask);
+			const Bitboard bishopMask = generateBishopMask(E4);
+			const int bishopBits = popCount(bishopMask);
 
 			// Test all bits set - should equal the original mask
-			int allSetIndex = (1 << bishopBits) - 1;
-			Bitboard bishopOcc = setOccupancy(allSetIndex, bishopBits, bishopMask);
+			const int allSetIndex = (1 << bishopBits) - 1;
+			const Bitboard bishopOcc = setOccupancy(allSetIndex, bishopBits, bishopMask);
 			success &= (bishopOcc == bishopMask);
 
 			report("setOccupancy function", success);
 		}
 
 		void testFindMagicEasy() {
-			bool success = true;
-
 			try {
+				bool success = true;
 				// Test a corner square first (fewer relevant bits)
-				Square testSquare = A1;
-				int indexBits = 6;
+				constexpr Square testSquare = A1;
+				constexpr int indexBits = 6;
 
 				std::cout << "Attempting to find bishop magic for square A1..." << std::endl;
-				Bitboard bishopMagic = findMagic(testSquare, BISHOP, indexBits);
+				const Bitboard bishopMagic = findMagic(testSquare, BISHOP, indexBits);
 
 				if (bishopMagic != 0) {
 					success = true;
@@ -325,7 +325,7 @@ namespace chess {
 
 				try {
 					// Find magic number for this test case
-					Bitboard magic = findMagic(test.square, test.pieceType, test.indexBits);
+					const Bitboard magic = findMagic(test.square, test.pieceType, test.indexBits);
 
 					if (magic == 0) {
 						std::cout << "    Failed: Got zero magic number" << std::endl;
@@ -336,16 +336,16 @@ namespace chess {
 						std::cout << "    Found magic: 0x" << std::hex << magic << std::dec << std::endl;
 
 						// Verify the magic number works by checking occupancy patterns
-						Bitboard mask = (test.pieceType == BISHOP) ?
+						const Bitboard mask = (test.pieceType == BISHOP) ?
 							generateBishopMask(test.square) :
 							generateRookMask(test.square);
 
-						int maskBits = popCount(mask);
-						int occupancyCount = 1 << maskBits;
+						const int maskBits = popCount(mask);
+						const int occupancyCount = 1 << maskBits;
 
 						// Only test a subset of all occupancies to keep the test fast
 						// We'll test at most 100 patterns, evenly distributed
-						int testStep = std::max(1, occupancyCount / 100);
+						const int testStep = std::max(1, occupancyCount / 100);
 						int testedCount = 0;
 
 						std::vector<Bitboard> usedIndices;
@@ -353,8 +353,8 @@ namespace chess {
 
 						for (int i = 0; i < occupancyCount && !collisionFound && testedCount < 100; i += testStep) {
 							testedCount++;
-							Bitboard occ = setOccupancy(i, maskBits, mask);
-							Bitboard attacks = (test.pieceType == BISHOP) ?
+							const Bitboard occ = setOccupancy(i, maskBits, mask);
+							const Bitboard attacks = (test.pieceType == BISHOP) ?
 								generateBishopAttacks(test.square, occ) :
 								generateRookAttacks(test.square, occ);
 

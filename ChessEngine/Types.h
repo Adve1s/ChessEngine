@@ -1,7 +1,6 @@
 #pragma once
-#include <cstdint>
-#include <cassert>
 #include <iostream>
+#include <cstdint>
 
 namespace chess {
 
@@ -11,7 +10,7 @@ namespace chess {
 	// Piece types
 	enum PieceType : int
 	{
-		NO_PIECE_TYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING,
+		NO_PIECE_TYPE = 0, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING,
 		ALL_PIECES = 0,
 		PIECE_TYPE_NB = 8
 	};
@@ -45,14 +44,14 @@ namespace chess {
 	{
 		WHITE,
 		BLACK,
-		NO_COLOR,
+		NO_COLOR = 2,
 		COLOR_NB = 2
 	};
 
 	// Square identifiers (0-63, plus NO_SQUARE)
 	enum Square : int
 	{
-		A1, B1, C1, D1, E1, F1, G1, H1,
+		A1 = 0, B1, C1, D1, E1, F1, G1, H1,
 		A2, B2, C2, D2, E2, F2, G2, H2,
 		A3, B3, C3, D3, E3, F3, G3, H3,
 		A4, B4, C4, D4, E4, F4, G4, H4,
@@ -60,7 +59,7 @@ namespace chess {
 		A6, B6, C6, D6, E6, F6, G6, H6,
 		A7, B7, C7, D7, E7, F7, G7, H7,
 		A8, B8, C8, D8, E8, F8, G8, H8,
-		NO_SQUARE,
+		NO_SQUARE = 64,
 		SQUARE_ZERO = 0,
 		SQUARE_NB = 64
 	};
@@ -110,9 +109,9 @@ namespace chess {
 
 	// Utility functions
 	constexpr bool isSquare(const Square s) {return s >= SQUARE_ZERO && s < NO_SQUARE;}
-	constexpr File fileOf(const Square sq) { return File(sq & 7); }
-	constexpr Rank rankOf(const Square sq) { return Rank(sq >> 3); }
-	constexpr Square makeSquare(const File f, const Rank r) { return Square((r << 3) | f); }
+	constexpr File fileOf(const Square sq) { return static_cast<File>(sq & 7); }
+	constexpr Rank rankOf(const Square sq) { return static_cast<Rank>(sq >> 3); }
+	constexpr Square makeSquare(const File f, const Rank r) { return static_cast<Square>((r << 3) | f); }
 
 	// Castling rights (can be combined with bitwise OR)
 	enum CastlingRights : int
@@ -133,8 +132,8 @@ namespace chess {
 	};
 
 #define ENABLE_INCR_OPERATORS_ON(T) \
-    inline T& operator++(T& d) { return d = T(int(d) + 1); } \
-    inline T& operator--(T& d) { return d = T(int(d) - 1); }
+    inline T& operator++(T& d) noexcept  { return d = T(int(d) + 1); } \
+    inline T& operator--(T& d) noexcept  { return d = T(int(d) - 1); }
 
 	ENABLE_INCR_OPERATORS_ON(Square)
 

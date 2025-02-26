@@ -1,5 +1,7 @@
 #pragma once
+#include <cassert>
 #include <string>
+#include <gsl/narrow>
 #include "types.h"
 
 namespace chess {
@@ -50,7 +52,7 @@ namespace chess {
 	}
 
 	template<typename T>
-	inline int distance(const Square x, const Square y) {
+	int distance(const Square x, const Square y) noexcept{
 		if constexpr (std::is_same_v<T, File>) {
 			return abs(fileOf(x) - fileOf(y));
 		}
@@ -87,23 +89,23 @@ namespace chess {
 	}
 
 	// Get the least significant bit position (first set bit)
-	inline Square lsb(const Bitboard board) {
+	inline Square lsb(const Bitboard board) noexcept {
 		assert(board);  // Fail fast if empty
 		unsigned long index;
 		_BitScanForward64(&index, board);
-		return Square(index);
+		return static_cast<Square>(index);
 	}
 
 	// Get the most significant bit position (last set bit)
-	inline Square msb(const Bitboard board) {
+	inline Square msb(const Bitboard board) noexcept {
 		assert(board);  // Fail fast if empty
 		unsigned long index;
 		_BitScanReverse64(&index, board);
-		return Square(index);
+		return static_cast<Square>(index);
 	}
 
 	// Get and clear the least significant bit
-	inline Square popLsb(Bitboard& b) {
+	inline Square popLsb(Bitboard& b) noexcept {
 		assert(b);                    // Fail fast if empty
 		const Square s = Square(lsb(b));  // Reuse lsb() function
 		// (x & (x-1)) clears the least significant set bit
@@ -111,7 +113,7 @@ namespace chess {
 		return s;
 	}
 
-	inline int popCount(const Bitboard board) {
+	inline int popCount(const Bitboard board) noexcept {
 		return static_cast<int>(__popcnt64(board));
 	}
 
@@ -120,5 +122,5 @@ namespace chess {
 
 	// Helper functions - declared here, defined in cpp file
 	std::string squareToString(Square square);
-	int stringToSquare(const std::string& squareStr);
+	int stringToSquare(const std::string& squareStr) noexcept;
 }

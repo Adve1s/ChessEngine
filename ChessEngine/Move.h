@@ -1,46 +1,44 @@
 #pragma once
 #include <string>
-#include "types.h"
-
-using namespace chess;
+#include "Types.h"
 
 class Move
 {
 public:
 	// Constructor with basic move information
-	Move() : m_data(0) {}
+	Move() noexcept : m_data(0) {}
 
 	// Constructor with basic move information
-	Move(Square fromSquare, Square toSquare, PieceType piece);
+	Move(chess::Square fromSquare, chess::Square toSquare, chess::PieceType piece) noexcept;
 
 	// Constructor for captures
-	Move(Square fromSquare, Square toSquare, PieceType piece, PieceType capturedPiece);
+	Move(chess::Square fromSquare, chess::Square toSquare, chess::PieceType piece, chess::PieceType capturedPiece) noexcept;
 
 	// Constructor for promotions
-	Move(Square fromSquare, Square toSquare, PieceType fromPiece, PieceType toPiece, bool isCapture = false, PieceType capturedPiece = NO_PIECE_TYPE);
+	Move(chess::Square fromSquare, chess::Square toSquare, chess::PieceType fromPiece, chess::PieceType toPiece, bool isCapture = false, chess::PieceType capturedPiece = chess::NO_PIECE_TYPE) noexcept;
 
 	// Getters
-	int getFrom() const { return m_data & 0x3F; }
-	int getTo() const { return (m_data >> 6) & 0x3F; }
-	PieceType getPiece() const { return static_cast<PieceType>((m_data >> 12) & 0x7); }
-	MoveType getType() const { return static_cast<MoveType>((m_data >> 18) & 0x7); }
-	PieceType getCapturedPiece() const { return static_cast<PieceType>((m_data >> 15) & 0x7); }
-	PieceType getPromotionPiece() const { return static_cast<PieceType>((m_data >> 21) & 0x7); }
+	int getFrom() const noexcept { return m_data & 0x3F; }
+	int getTo() const noexcept { return (m_data >> 6) & 0x3F; }
+	chess::PieceType getPiece() const noexcept { return static_cast<chess::PieceType>((m_data >> 12) & 0x7); }
+	chess::MoveType getType() const noexcept { return static_cast<chess::MoveType>((m_data >> 18) & 0x7); }
+	chess::PieceType getCapturedPiece() const noexcept { return static_cast<chess::PieceType>((m_data >> 15) & 0x7); }
+	chess::PieceType getPromotionPiece() const noexcept { return static_cast<chess::PieceType>((m_data >> 21) & 0x7); }
 
 	// Object-oriented methods (for working with Move objects)
-	bool isCapture() const { return isCaptureFlag(m_data); }
-	bool isPromotion() const { return isPromotionFlag(m_data); }
+	bool isCapture() const noexcept { return isCaptureFlag(m_data); }
+	bool isPromotion() const noexcept { return isPromotionFlag(m_data); }
 	bool isCastling() const { return isCastlingFlag(m_data); }
 
 	// Static utility methods (for working with raw move data)
-	static bool isCaptureFlag(const uint32_t moveData) { return (moveData >> 24) & 1; }
-	static bool isPromotionFlag(const uint32_t moveData) { return (moveData >> 25) & 1; }
-	static bool isCastlingFlag(const uint32_t moveData) { return (moveData >> 26) & 1; }
+	constexpr static bool isCaptureFlag(const uint32_t moveData) noexcept { return (moveData >> 24) & 1; }
+	constexpr static bool isPromotionFlag(const uint32_t moveData) noexcept { return (moveData >> 25) & 1; }
+	constexpr static bool isCastlingFlag(const uint32_t moveData) { return (moveData >> 26) & 1; }
 
-	bool operator==(const Move& other) const;
-	bool operator!=(const Move& other) const {return !(*this == other);}
+	bool operator==(const Move& other) const noexcept;
+	bool operator!=(const Move& other) const noexcept {return !(*this == other);}
 	// Set the move type
-	void setType(MoveType type, PieceType capturedPiece = NO_PIECE_TYPE, PieceType promotionPiece = NO_PIECE_TYPE);
+	void setType(chess::MoveType type, chess::PieceType capturedPiece = chess::NO_PIECE_TYPE, chess::PieceType promotionPiece = chess::NO_PIECE_TYPE) noexcept;
 
 	// For printing/debugging
 	std::string toString() const;

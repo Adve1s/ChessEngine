@@ -20,7 +20,7 @@ namespace chess {
 	{
 		for (Square sq1 = A1; sq1 < SQUARE_NB; ++sq1)
 			for (Square sq2 = A1; sq2 < SQUARE_NB; ++sq2)
-				g_squareDistance[sq1][sq2] = std::max(distance<File>(sq1, sq2), distance<Rank>(sq1, sq2));
+				g_squareDistance[sq1][sq2] = static_cast<uint8_t>(std::max(distance<File>(sq1, sq2), distance<Rank>(sq1, sq2)));
 	}
 
 	void initBetweenThroughBB()
@@ -36,20 +36,20 @@ namespace chess {
 				dirs[0] = getDirection(sq1, sq2);
 				dirs[1] = getDirection(sq2, sq1);
 				if (dirs[0] == Direction(0)) {
-					g_throughBB[sq1][sq2] = Bitboard(0);
+					g_throughBB[sq1][sq2] = Bitboard{ 0 };
 					g_betweenBB[sq1][sq2] |= squareToBB(sq2);
 					continue;
 				}
 				Square temp = sq1;
 				for (int num = 0; num < dist - 1; ++num) {
 					g_betweenBB[sq1][sq2] |= insideBoard(temp, dirs[0]);
-					temp = Square(temp + dirs[0]);
+					temp = static_cast<Square>(temp + dirs[0]);
 				}
 				for (const auto& d : dirs) {
 					temp = sq1;
 					while (const Bitboard next = insideBoard(temp, d)) {
 						g_throughBB[sq1][sq2] |= next;
-						temp = Square(temp + d);
+						temp = static_cast<Square>(temp + d);
 					}
 				}
 			}
@@ -67,7 +67,7 @@ namespace chess {
 				Square temp = sq;
 				while (const Bitboard next = insideBoard(temp, d)) {
 					g_pseudoAttacks[BISHOP][sq] |= next;
-					temp = Square(temp + d);
+					temp = static_cast<Square>(temp + d);
 				}
 			}
 
@@ -87,21 +87,21 @@ namespace chess {
 	Bitboard insideBoard(const Square square, const int step)
 	{
 		assert(isSquare(square));
-		Square to = Square(square + step);
+		const auto to = static_cast<Square>(square + step);
 		if (!isSquare(to)) {
-			return Bitboard(0);
+			return Bitboard{ 0 };
 		}
 		if (distance<Square>(square, to) <= 2) {
 			return squareToBB(to);
 		}
-		return Bitboard(0);
+		return Bitboard{ 0 };
 	}
 
 	// Helper to determine the direction between two squares
 	Direction getDirection(const Square from,const Square to)
 	{
-		int fileDiff = fileOf(to) - fileOf(from);
-		int rankDiff = rankOf(to) - rankOf(from);
+		const int fileDiff = fileOf(to) - fileOf(from);
+		const int rankDiff = rankOf(to) - rankOf(from);
 
 		if (fileDiff == 0)
 			return rankDiff > 0 ? NORTH : SOUTH;
@@ -113,7 +113,7 @@ namespace chess {
 			else
 				return fileDiff > 0 ? SOUTH_EAST : SOUTH_WEST;
 		}
-		return Direction(0);
+		return Direction{ 0 };
 	}
 
 	// Print a visual representation of a single bitboard
@@ -130,7 +130,7 @@ namespace chess {
 	}
 
 	// Convert algebraic notation to a square number (e.g., "e4" -> 28)
-	int stringToSquare(const std::string& squareStr)
+	int stringToSquare(const std::string& squareStr) noexcept
 	{
 		if (squareStr == "-") return NO_SQUARE;
 		if (squareStr.length() != 2) return NO_SQUARE;
@@ -153,15 +153,15 @@ namespace chess {
 	{
 		assert(isSquare(square));
 		// Convert square to file and rank
-		File file = fileOf(square);   // Gets 0-7 for files a-h
-		Rank rank = rankOf(square);   // Gets 0-7 for ranks 1-8
+		const File file = fileOf(square);   // Gets 0-7 for files a-h
+		const Rank rank = rankOf(square);   // Gets 0-7 for ranks 1-8
 
 		// Create the string:
 		// - File is converted to char by adding 'a' (e.g., 0 -> 'a', 1 -> 'b')
 		// - Rank is converted to char by adding '1' (e.g., 0 -> '1', 1 -> '2')
 		std::string result;
-		result += char('a' + file);  // Convert file number to letter
-		result += char('1' + rank);  // Convert rank number to digit
+		result += gsl::narrow_cast<char>('a' + file);  // Convert file number to letter
+		result += gsl::narrow_cast<char>('1' + rank);  // Convert rank number to digit
 
 		return result;
 	}
