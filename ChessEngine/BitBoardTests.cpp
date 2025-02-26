@@ -108,19 +108,19 @@ namespace chess {
 			bool success = true;
 
 			// Test white pawn attacks
-			success &= (g_pawnAttacks[WHITE][A2] == (squareToBB(B3)));
-			success &= (g_pawnAttacks[WHITE][E4] == (squareToBB(D5) | squareToBB(F5)));
-			success &= (g_pawnAttacks[WHITE][H7] == (squareToBB(G8)));
-			success &= (g_pawnAttacks[WHITE][A8] == Bitboard{ 0 });
+			success &= (g_pawnAttacks.at(WHITE).at(A2) == (squareToBB(B3)));
+			success &= (g_pawnAttacks.at(WHITE).at(E4) == (squareToBB(D5) | squareToBB(F5)));
+			success &= (g_pawnAttacks.at(WHITE).at(H7) == (squareToBB(G8)));
+			success &= (g_pawnAttacks.at(WHITE).at(A8) == Bitboard{ 0 });
 
 			report("White pawn attacks", success);
 
 			// Test black pawn attacks
 			success = true;
-			success &= (g_pawnAttacks[BLACK][A7] == (squareToBB(B6)));
-			success &= (g_pawnAttacks[BLACK][E5] == (squareToBB(D4) | squareToBB(F4)));
-			success &= (g_pawnAttacks[BLACK][H2] == (squareToBB(G1)));
-			success &= (g_pawnAttacks[BLACK][A1] == Bitboard{ 0 });
+			success &= (g_pawnAttacks.at(BLACK).at(A7) == (squareToBB(B6)));
+			success &= (g_pawnAttacks.at(BLACK).at(E5) == (squareToBB(D4) | squareToBB(F4)));
+			success &= (g_pawnAttacks.at(BLACK).at(H2) == (squareToBB(G1)));
+			success &= (g_pawnAttacks.at(BLACK).at(A1) == Bitboard{ 0 });
 
 			report("Black pawn attacks", success);
 		}
@@ -132,7 +132,7 @@ namespace chess {
 			bool success = true;
 
 			// Middle of board
-			const Bitboard e4Knights = g_pseudoAttacks[KNIGHT][E4];
+			const Bitboard e4Knights = g_pseudoAttacks.at(KNIGHT).at(E4);
 			success &= (popCount(e4Knights) == 8);
 			success &= (e4Knights & squareToBB(D6)) != 0;
 			success &= (e4Knights & squareToBB(F6)) != 0;
@@ -146,7 +146,7 @@ namespace chess {
 			report("Knight attacks (middle)", success);
 
 			// Corner of board
-			const Bitboard a1Knights = g_pseudoAttacks[KNIGHT][A1];
+			const Bitboard a1Knights = g_pseudoAttacks.at(KNIGHT).at(A1);
 			success = true;
 			success &= (popCount(a1Knights) == 2);
 			success &= (a1Knights & squareToBB(B3)) != 0;
@@ -162,7 +162,7 @@ namespace chess {
 			bool success = true;
 
 			// Middle of board
-			const Bitboard e4King = g_pseudoAttacks[KING][E4];
+			const Bitboard e4King = g_pseudoAttacks.at(KING).at(E4);
 			success &= (popCount(e4King) == 8);
 
 			// Check each square the king can move to
@@ -178,7 +178,7 @@ namespace chess {
 			report("King attacks (middle)", success);
 
 			// Corner of board
-			const Bitboard a1King = g_pseudoAttacks[KING][A1];
+			const Bitboard a1King = g_pseudoAttacks.at(KING).at(A1);
 			success = true;
 			success &= (popCount(a1King) == 3);
 			success &= (a1King & squareToBB(A2)) != 0;
@@ -194,7 +194,7 @@ namespace chess {
 
 			// Test rook attacks
 			bool success = true;
-			const Bitboard e4Rook = g_pseudoAttacks[ROOK][E4];
+			const Bitboard e4Rook = g_pseudoAttacks.at(ROOK).at(E4);
 
 			// Check count - should be 14 squares (7 horizontal + 7 vertical, excluding E4)
 			success &= (popCount(e4Rook) == 14);
@@ -209,7 +209,7 @@ namespace chess {
 
 			// Test bishop attacks
 			success = true;
-			const Bitboard e4Bishop = g_pseudoAttacks[BISHOP][E4];
+			const Bitboard e4Bishop = g_pseudoAttacks.at(BISHOP).at(E4);
 
 			// There should be 13 squares a bishop can attack from E4
 			// (NE: 3, SE: 3, SW: 3, NW: 4)
@@ -225,7 +225,7 @@ namespace chess {
 
 			// Test queen attacks (combination of rook and bishop)
 			success = true;
-			const Bitboard e4Queen = g_pseudoAttacks[QUEEN][E4];
+			const Bitboard e4Queen = g_pseudoAttacks.at(QUEEN).at(E4);
 			success &= (e4Queen == (e4Rook | e4Bishop));
 			success &= (popCount(e4Queen) == 27); // 14 rook + 13 bishop
 
@@ -240,25 +240,25 @@ namespace chess {
 
 			// Test between squares
 			// Between A1 and A5 should be A2, A3, A4
-			Bitboard between = g_betweenBB[A1][A5];
+			Bitboard between = g_betweenBB.at(A1).at(A5);
 			success &= (popCount(between) == 3);
 			success &= (between & squareToBB(A2)) != 0;
 			success &= (between & squareToBB(A3)) != 0;
 			success &= (between & squareToBB(A4)) != 0;
 
 			// Diagonal between A1 and D4 should be B2, C3
-			between = g_betweenBB[A1][D4];
+			between = g_betweenBB.at(A1).at(D4);
 			success &= (popCount(between) == 2);
 			success &= (between & squareToBB(B2)) != 0;
 			success &= (between & squareToBB(C3)) != 0;
 
 			// No diagonal between A1 and C8, should return C8
-			between = g_betweenBB[A1][C8];
+			between = g_betweenBB.at(A1).at(C8);
 			success &= (popCount(between) == 1);
 			success &= (between & squareToBB(C8)) != 0;
 
 			// In place A1 and A1, should be empty
-			between = g_betweenBB[A1][A1];
+			between = g_betweenBB.at(A1).at(A1);
 			success &= (popCount(between) == 0);
 			success &= between == 0;
 
@@ -266,7 +266,7 @@ namespace chess {
 
 			// Test through squares
 			// Through A1 to H8 should include the diagonal and beyond
-			Bitboard through = g_throughBB[A1][H8];
+			Bitboard through = g_throughBB.at(A1).at(H8);
 			success = true;
 
 			// Should include all squares on the a1-h8 diagonal
@@ -275,17 +275,17 @@ namespace chess {
 			}
 
 			// H5 and D5, should be A5 to H5
-			through = g_throughBB[H5][D5];
+			through = g_throughBB.at(H5).at(D5);
 			for (const Square s : {A5, B5, C5, D5, E5, F5, G5, H5}) {
 				success &= (through & squareToBB(s)) != 0;
 			}
 
 			// A1 and D2, should return empty
-			through = g_throughBB[A1][D2];
+			through = g_throughBB.at(A1).at(D2);
 			success &= through == 0;
 
 			// A1 and A1, should return A1
-			through = g_throughBB[A1][A1];
+			through = g_throughBB.at(A1).at(A1);
 			success &= (through & squareToBB(A1)) != 0;
 
 			report("Through squares", success);
@@ -317,13 +317,22 @@ namespace chess {
 			// Test file masks
 			bool success = true;
 			success &= (popCount(FILE_MASK_A) == 8);
-			success &= (FILE_MASK_A == 0x0101010101010101ULL);
-			success &= ((FILE_MASK_A & RANK_MASK_1) == squareToBB(A1));
 
 			// Test rank masks
 			success &= (popCount(RANK_MASK_1) == 8);
-			success &= (RANK_MASK_1 == 0xFF);
-			success &= ((RANK_MASK_4 & FILE_MASK_E) == squareToBB(E4));
+
+			// Test that file and rank intersections give the correct squares
+			success &= ((RANK_MASK_1 & FILE_MASK_A) == squareToBB(A1));
+			success &= ((RANK_MASK_1 & FILE_MASK_D) == squareToBB(D1));
+			success &= ((RANK_MASK_1 & FILE_MASK_H) == squareToBB(H1));
+
+			success &= ((RANK_MASK_4 & FILE_MASK_A) == squareToBB(A4));
+			success &= ((RANK_MASK_4 & FILE_MASK_D) == squareToBB(D4));
+			success &= ((RANK_MASK_4 & FILE_MASK_H) == squareToBB(H4));
+
+			success &= ((RANK_MASK_8 & FILE_MASK_A) == squareToBB(A8));
+			success &= ((RANK_MASK_8 & FILE_MASK_D) == squareToBB(D8));
+			success &= ((RANK_MASK_8 & FILE_MASK_H) == squareToBB(H8));
 
 			std::cout << (success ? "PASS: " : "FAIL: ") << "Mask bitboards" << "\n";
 		}

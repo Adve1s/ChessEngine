@@ -1,4 +1,5 @@
 #pragma once
+#include <gsl/narrow>
 #include "Types.h"
 
 namespace chess {
@@ -9,20 +10,27 @@ namespace chess {
 		int shift;          // How many bits to shift right after multiplication
 
 		// Calculate index into attacks table
-		inline unsigned int getIndex(Bitboard occupied) const {
+		inline unsigned int getIndex(Bitboard occupied) const noexcept {
 			// This is the core of the magic bitboard technique:
 			// 1. Filter the occupied squares to only those that matter (the mask)
 			// 2. Multiply by the magic number to create a unique pattern
 			// 3. Shift right to compress into an index
-			return static_cast<unsigned int>(((occupied & mask) * magic) >> shift);
+			return gsl::narrow_cast<unsigned int>(((occupied & mask) * magic) >> shift);
 		}
 	};
 
+	class MagicNumberNotFoundException final : public std::runtime_error {
+	public:
+		explicit MagicNumberNotFoundException(const std::string& message)
+			: std::runtime_error(message) {}
+	};
+
+
 	// Global arrays to store our magic data
-	extern Magic g_rookMagics[SQUARE_NB];      // One entry per square for rooks
-	extern Magic g_bishopMagics[SQUARE_NB];    // One entry per square for bishops
-	extern Bitboard g_rookTable[0x19000];      // Table for rook attacks (size based on Stockfish)
-	extern Bitboard g_bishopTable[0x1480];     // Table for bishop attacks (size based on Stockfish)
+	extern std::array<Magic, SQUARE_NB>g_rookMagics;// One entry per square for rooks
+	extern std::array<Magic, SQUARE_NB>g_bishopMagics;    // One entry per square for bishops
+	extern std::array<Bitboard, 0x19000>g_rookTable;      // Table for rook attacks (size based on Stockfish)
+	extern std::array<Bitboard, 0x1480>g_bishopTable;     // Table for bishop attacks (size based on Stockfish)
 
 	// Function declarations
 	void initMagicBitboards();  // Initialize all the magic bitboard tables

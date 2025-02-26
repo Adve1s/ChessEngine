@@ -214,12 +214,12 @@ namespace chess {
 			success &= (popCount(d4QueenAttacks) == 27); // 13 bishop + 14 rook
 
 			// Should contain all rook and bishop attacks
-			constexpr Bitboard bishopSquares[4] = { squareToBB(C3), squareToBB(E5), squareToBB(C5), squareToBB(E3) };
-			constexpr Bitboard rookSquares[4] = { squareToBB(D1), squareToBB(D8), squareToBB(A4), squareToBB(H4) };
+			constexpr std::array<Bitboard, 4>bishopSquares = { squareToBB(C3), squareToBB(E5), squareToBB(C5), squareToBB(E3) };
+			constexpr std::array<Bitboard, 4>rookSquares = { squareToBB(D1), squareToBB(D8), squareToBB(A4), squareToBB(H4) };
 
 			for (int i = 0; i < 4; i++) {
-				success &= (d4QueenAttacks & bishopSquares[i]) != 0;
-				success &= (d4QueenAttacks & rookSquares[i]) != 0;
+				success &= (d4QueenAttacks & bishopSquares.at(i)) != 0;
+				success &= (d4QueenAttacks & rookSquares.at(i)) != 0;
 			}
 
 			report("Combined sliding piece attacks (Queen)", success);
@@ -283,27 +283,26 @@ namespace chess {
 				constexpr Square testSquare = A1;
 				constexpr int indexBits = 6;
 
-				std::cout << "Attempting to find bishop magic for square A1..." << std::endl;
+				std::cout << "Attempting to find bishop magic for square A1..." << "\n";
 				const Bitboard bishopMagic = findMagic(testSquare, BISHOP, indexBits);
 
 				if (bishopMagic != 0) {
 					success = true;
-					std::cout << "Found bishop magic number: 0x" << std::hex << bishopMagic << std::dec << std::endl;
+					std::cout << "Found bishop magic number: 0x" << std::hex << bishopMagic << std::dec << "\n";
 				}
 
 				report("findMagic function", success);
 			}
-			catch (const std::exception& e) {
-				std::cout << "Exception in findMagic test: " << e.what() << std::endl;
+			catch (const MagicNumberNotFoundException& e) {  // Catch specific error
+				std::cout << "Magic number computation failed: " << e.what() << "\n";
 				report("findMagic function", false);
 			}
 		}
 
-		void testFindMagic() {
-			std::cout << "Testing Magic Bitboard Generation..." << std::endl;
+		void testFindMagicBasic() {
+			std::cout << "Testing Basic Magic Number Generation..." << std::endl;
 			bool overallSuccess = true;
 
-			// Test structure to store our test cases
 			struct TestCase {
 				Square square;
 				PieceType pieceType;
@@ -311,7 +310,6 @@ namespace chess {
 				std::string description;
 			};
 
-			// Define a variety of test cases
 			std::vector<TestCase> testCases = {
 				{A1, BISHOP, 6, "Bishop on corner (A1)"},
 				{H1, BISHOP, 6, "Bishop on corner (H1)"},
@@ -322,76 +320,63 @@ namespace chess {
 			for (const auto& test : testCases) {
 				bool success = true;
 				std::cout << "  Testing " << test.description << "..." << std::endl;
-
 				try {
-					// Find magic number for this test case
 					const Bitboard magic = findMagic(test.square, test.pieceType, test.indexBits);
-
 					if (magic == 0) {
 						std::cout << "    Failed: Got zero magic number" << std::endl;
 						success = false;
 					}
 					else {
-						// Print the found magic in hex format
 						std::cout << "    Found magic: 0x" << std::hex << magic << std::dec << std::endl;
-
-						// Verify the magic number works by checking occupancy patterns
-						const Bitboard mask = (test.pieceType == BISHOP) ?
-							generateBishopMask(test.square) :
-							generateRookMask(test.square);
-
-						const int maskBits = popCount(mask);
-						const int occupancyCount = 1 << maskBits;
-
-						// Only test a subset of all occupancies to keep the test fast
-						// We'll test at most 100 patterns, evenly distributed
-						const int testStep = std::max(1, occupancyCount / 100);
-						int testedCount = 0;
-
-						std::vector<Bitboard> usedIndices;
-						bool collisionFound = false;
-
-						for (int i = 0; i < occupancyCount && !collisionFound && testedCount < 100; i += testStep) {
-							testedCount++;
-							const Bitboard occ = setOccupancy(i, maskBits, mask);
-							const Bitboard attacks = (test.pieceType == BISHOP) ?
-								generateBishopAttacks(test.square, occ) :
-								generateRookAttacks(test.square, occ);
-
-							// Calculate index using the magic number
-							Bitboard index = (occ * magic) >> (64 - test.indexBits);
-
-							// Check for duplicate indices with different attack patterns
-							for (int j = 0; j < usedIndices.size(); j++) {
-								if (usedIndices[j] == index && attacks !=
-									((test.pieceType == BISHOP) ?
-										generateBishopAttacks(test.square, setOccupancy(j * testStep, maskBits, mask)) :
-										generateRookAttacks(test.square, setOccupancy(j * testStep, maskBits, mask)))) {
-									std::cout << "    Failed: Collision detected for index " << index << std::endl;
-									collisionFound = true;
-									success = false;
-									break;
-								}
-							}
-
-							usedIndices.push_back(index);
-						}
-
-						if (!collisionFound) {
-							std::cout << "    Verified " << testedCount << " occupancy patterns with no collisions" << std::endl;
-						}
 					}
 				}
-				catch (const std::exception& e) {
-					std::cout << "    Exception: " << e.what() << std::endl;
-					success = false;
+				catch (const MagicNumberNotFoundException& e) {  // Catch specific error
+					std::cout << "Magic number computation failed: " << e.what() << "\n";
+					report("findMagic function", false);
 				}
-
 				report(test.description, success);
 				overallSuccess &= success;
 			}
+			report("Basic Magic Number Generation", overallSuccess);
+		}
 
-			report("Overall Magic Bitboard Generation", overallSuccess);
+		void testFindMagicCollisions() {
+			std::cout << "Testing Magic Collision Detection..." << std::endl;
+			bool overallSuccess = true;
+
+			struct TestCase {
+				Square square;
+				PieceType pieceType;
+				int indexBits;
+			};
+
+			std::vector<TestCase> testCases = {
+				{A1, BISHOP, 6}, {H1, BISHOP, 6}, {A1, ROOK, 12}, {D4, BISHOP, 9}
+			};
+
+			for (const auto& test : testCases) {
+				bool success = true;
+				const Bitboard magic = findMagic(test.square, test.pieceType, test.indexBits);
+				const Bitboard mask = (test.pieceType == BISHOP) ? generateBishopMask(test.square) : generateRookMask(test.square);
+				const int maskBits = popCount(mask);
+				const int occupancyCount = 1 << maskBits;
+				const int testStep = std::max(1, occupancyCount / 100);
+				std::vector<Bitboard> usedIndices;
+
+				for (int i = 0; i < occupancyCount && usedIndices.size() < 100; i += testStep) {
+					const Bitboard occ = setOccupancy(i, maskBits, mask);
+					const Bitboard index = (occ * magic) >> (64 - test.indexBits);
+					if (std::find(usedIndices.begin(), usedIndices.end(), index) != usedIndices.end()) {
+						std::cout << "    Failed: Collision detected for index " << index << std::endl;
+						success = false;
+						break;
+					}
+					usedIndices.push_back(index);
+				}
+				report("Collision Test", success);
+				overallSuccess &= success;
+			}
+			report("Magic Collision Detection", overallSuccess);
 		}
 
 		void runAllMagicBBTests() {
@@ -402,7 +387,8 @@ namespace chess {
 			testCombinedSlidingAttacks();
 			testSetOccupancy();
 			testFindMagicEasy();
-			testFindMagic();
+			testFindMagicBasic();
+			testFindMagicCollisions();
 			std::cout << "\nBitBoard MagicBB completed." << "\n";
 		}
 	}

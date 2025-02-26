@@ -76,7 +76,7 @@ void Move::setType(const chess::MoveType type, const PieceType capturedPiece, co
 	m_data |= ((static_cast<uint32_t>(promotionPiece) & 0x7) << 21);
 
 	// Flag patterns for each move type (positioned at bits 24-26)
-	static constexpr uint32_t FLAG_PATTERNS[8] = {
+	static constexpr std::array<uint32_t, 8>FLAG_PATTERNS = {
 		0, // NORMAL
 		1 << 24, // CAPTURE (capture flag)
 		0, // PAWN_TWO_FORWARD
@@ -88,7 +88,7 @@ void Move::setType(const chess::MoveType type, const PieceType capturedPiece, co
 	};
 
 	// Set the flags
-	m_data |= FLAG_PATTERNS[type];
+	m_data |= FLAG_PATTERNS.at(type);
 }
 
 // Convert move to string for output

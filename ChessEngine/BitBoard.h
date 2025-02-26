@@ -31,14 +31,12 @@ namespace chess {
 	constexpr Bitboard RANK_MASK_7 = RANK_MASK_1 << (8 * 6);
 	constexpr Bitboard RANK_MASK_8 = RANK_MASK_1 << (8 * 7);
 
-	//extern uint8_t PopCnt16[1 << 16];
+	extern std::array<std::array<Bitboard, SQUARE_NB>, SQUARE_NB> g_betweenBB;
+	extern std::array<std::array<Bitboard, SQUARE_NB>, SQUARE_NB> g_throughBB;
+	extern std::array<std::array<Bitboard, SQUARE_NB>, PIECE_TYPE_NB> g_pseudoAttacks;
+	extern std::array<std::array<Bitboard, SQUARE_NB>, COLOR_NB> g_pawnAttacks;
 
-	extern Bitboard g_betweenBB[SQUARE_NB][SQUARE_NB];
-	extern Bitboard g_throughBB[SQUARE_NB][SQUARE_NB];
-	extern Bitboard g_pseudoAttacks[PIECE_TYPE_NB][SQUARE_NB];
-	extern Bitboard g_pawnAttacks[COLOR_NB][SQUARE_NB];
-
-	extern uint8_t g_squareDistance[SQUARE_NB][SQUARE_NB];
+	extern std::array<std::array<uint8_t, SQUARE_NB>, SQUARE_NB> g_squareDistance;
 
 	Bitboard insideBoard(Square square,int step);
 
@@ -52,7 +50,7 @@ namespace chess {
 	}
 
 	template<typename T>
-	int distance(const Square x, const Square y) noexcept{
+	int distance(const Square x, const Square y) noexcept {
 		if constexpr (std::is_same_v<T, File>) {
 			return abs(fileOf(x) - fileOf(y));
 		}
@@ -60,7 +58,14 @@ namespace chess {
 			return abs(rankOf(x) - rankOf(y));
 		}
 		else {
+			// Disable warning about potential array bounds check
+			// This is safe because all callers provide valid square values
+			// and we cant afford to at() because function is used too often at run time
+#pragma warning(push)
+#pragma warning(disable: 26446)
+#pragma warning(disable: 26482)
 			return g_squareDistance[x][y];
+#pragma warning(pop)
 		}
 	}
 
@@ -107,14 +112,14 @@ namespace chess {
 	// Get and clear the least significant bit
 	inline Square popLsb(Bitboard& b) noexcept {
 		assert(b);                    // Fail fast if empty
-		const Square s = Square(lsb(b));  // Reuse lsb() function
+		const auto s = lsb(b);  // Reuse lsb() function
 		// (x & (x-1)) clears the least significant set bit
 		b &= b - 1;                   // Clear LSB
 		return s;
 	}
 
 	inline int popCount(const Bitboard board) noexcept {
-		return static_cast<int>(__popcnt64(board));
+		return gsl::narrow_cast<int>(__popcnt64(board));
 	}
 
 	// Debug methods
@@ -122,5 +127,5 @@ namespace chess {
 
 	// Helper functions - declared here, defined in cpp file
 	std::string squareToString(Square square);
-	int stringToSquare(const std::string& squareStr) noexcept;
+	int stringToSquare(const std::string& squareStr);
 }

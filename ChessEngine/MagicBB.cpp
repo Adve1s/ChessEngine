@@ -2,6 +2,7 @@
 #include <random>
 #include <stdexcept>
 #include <vector>
+#include <array>
 #include "BitBoard.h"
 
 namespace chess {
@@ -24,12 +25,12 @@ namespace chess {
 
 	Bitboard generateRookMask(const Square sq) {
 		Bitboard mask = 0;
-		constexpr std::pair<Direction, Bitboard> directionEdges[] = {
+		constexpr std::array<std::pair<Direction, Bitboard>, 4> directionEdges = { {
 			{NORTH, RANK_MASK_8},
 			{SOUTH, RANK_MASK_1},
 			{EAST, FILE_MASK_H},
 			{WEST, FILE_MASK_A}
-		};
+		} };
 
 		for (const auto& [d, edge] : directionEdges) {
 			Square temp = sq;
@@ -93,10 +94,10 @@ namespace chess {
 		std::vector<Bitboard> attacks(occupancyCount);
 
 		for (int i= 0;i<occupancyCount;++i ){
-			occupancies[i] = setOccupancy(i,maskBits,mask);
-			attacks[i] = (pieceType == BISHOP) ?
-				generateBishopAttacks(square, occupancies[i])
-				: generateRookAttacks(square, occupancies[i]);
+			occupancies.at(i) = setOccupancy(i,maskBits,mask);
+			attacks.at(i) = (pieceType == BISHOP) ?
+				generateBishopAttacks(square, occupancies.at(i))
+				: generateRookAttacks(square, occupancies.at(i));
 		}
 
 
@@ -116,9 +117,6 @@ namespace chess {
 			if (popCount((mask * magic) >> 56) < 6) continue;
 
 			// Test this magic number
-			//std::vector<Bitboard> usedAttacks(1 << bits, 0);
-			//std::vector<bool> used(1 << bits, false);
-
 			std::vector<Bitboard> usedAttacks(1ULL << bits, 0);
 			std::vector<bool> used(1ULL << bits, false);
 
@@ -126,14 +124,14 @@ namespace chess {
 
 			for (int i = 0; i < occupancyCount && !failed; i++) {
 				// Calculate index using the magic number
-				const Bitboard index = (occupancies[i] * magic) >> (64 - bits);
+				const Bitboard index = (occupancies.at(i) * magic) >> (64 - bits);
 
-				if (!used[index]) {
+				if (!used.at(index)) {
 					// New index
-					used[index] = true;
-					usedAttacks[index] = attacks[i];
+					used.at(index) = true;
+					usedAttacks.at(index) = attacks.at(i);
 				}
-				else if (usedAttacks[index] != attacks[i]) {
+				else if (usedAttacks.at(index) != attacks.at(i)) {
 					// Collision with different attack pattern
 					failed = true;
 				}
@@ -145,6 +143,6 @@ namespace chess {
 		}
 
 		// Failed to find a magic
-		throw std::runtime_error("Failed to find magic number");
+		throw MagicNumberNotFoundException("Failed to find magic number");
 	}
 }
