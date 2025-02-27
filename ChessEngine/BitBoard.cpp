@@ -19,6 +19,7 @@ namespace chess {
 
 	void initSquareDistance()
 	{
+		assert(distance<Rank>(A1,A3) == 2 && distance<File>(A1,H1) == 7);
 		for (Square sq1 = A1; sq1 < SQUARE_NB; ++sq1)
 			for (Square sq2 = A1; sq2 < SQUARE_NB; ++sq2)
 				g_squareDistance.at(sq1).at(sq2) = static_cast<uint8_t>(std::max(distance<File>(sq1, sq2), distance<Rank>(sq1, sq2)));
@@ -59,6 +60,8 @@ namespace chess {
 				}
 			}
 		}
+		assert(g_betweenBB.at(A1).at(C3) == squareToBB(B2) && g_throughBB.at(A1).at(A5) == FILE_MASK_A 
+			&& g_betweenBB.at(A1).at(B3) == squareToBB(B3) && g_throughBB.at(A1).at(A1) == squareToBB(A1));
 	}
 
 	void initAttackBB()
@@ -66,6 +69,7 @@ namespace chess {
 		for (Square sq = A1; sq < SQUARE_NB; ++sq) {
 			const File f = fileOf(sq);
 			const Rank r = rankOf(sq);
+			assert(0 <= f && 0 <= r && f < 8 && r < 8);
 			g_pseudoAttacks.at(ROOK).at(sq) = (FILE_MASK_A << f | RANK_MASK_1 << (8 * r)) & ~squareToBB(sq);
 			for (const Direction d : {NORTH_EAST, NORTH_WEST, SOUTH_EAST, SOUTH_WEST})
 			{
@@ -87,6 +91,8 @@ namespace chess {
 			g_pawnAttacks.at(WHITE).at(sq) |= pawnAttack<WHITE>(sq);
 			g_pawnAttacks.at(BLACK).at(sq) |= pawnAttack<BLACK>(sq);
 		}
+		assert(popCount(g_pseudoAttacks.at(KING).at(A1)) == 3 && popCount(g_pseudoAttacks.at(KNIGHT).at(E4)) == 8 
+			&& popCount(g_pseudoAttacks.at(ROOK).at(C3)) == 14 && popCount(pawnAttack<WHITE>(C3)) == 2);
 	}
 
 	Bitboard insideBoard(const Square square, const int step)
@@ -105,6 +111,7 @@ namespace chess {
 	// Helper to determine the direction between two squares
 	Direction getDirection(const Square from,const Square to)
 	{
+		assert(isSquare(from) && isSquare(to));
 		const int fileDiff = fileOf(to) - fileOf(from);
 		const int rankDiff = rankOf(to) - rankOf(from);
 
@@ -160,7 +167,7 @@ namespace chess {
 		// Convert square to file and rank
 		const File file = fileOf(square);   // Gets 0-7 for files a-h
 		const Rank rank = rankOf(square);   // Gets 0-7 for ranks 1-8
-
+		assert(file>=0 && file<8 && rank>=0 && rank<8);
 		// Create the string:
 		// - File is converted to char by adding 'a' (e.g., 0 -> 'a', 1 -> 'b')
 		// - Rank is converted to char by adding '1' (e.g., 0 -> '1', 1 -> '2')

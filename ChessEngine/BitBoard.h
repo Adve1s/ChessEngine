@@ -60,16 +60,16 @@ namespace chess {
 		else {
 			// Disable warning about potential array bounds check
 			// This is safe because all callers provide valid square values
-			// and we cant afford to at() because function is used too often at run time
+			// and we cant afford to at() so it checks bounds with assert
 #pragma warning(push)
 #pragma warning(disable: 26446)
 #pragma warning(disable: 26482)
+			assert(isSquare(x) && isSquare(y));
 			return g_squareDistance[x][y];
 #pragma warning(pop)
 		}
 	}
 
-	Bitboard pawnAttack(Color color, Square square);
 	// Core bitboard operations
 	inline void setBit(Bitboard& board,const Square square) {
 		assert(isSquare(square));

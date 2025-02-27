@@ -1,7 +1,7 @@
 #include "Position.h"
-#include "BitBoard.h"
 
-Position::Position()
+void Position::printHi() const
 {
 	std::cout << "hi";
 }
+

@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <cstdint>
+#include <cassert>
 
 namespace chess {
 
@@ -108,10 +109,10 @@ namespace chess {
 	constexpr int MAX_GAME_LENGTH = 246;  // Maximum number of half-moves in a game
 
 	// Utility functions
-	constexpr bool isSquare(const Square s) {return s >= SQUARE_ZERO && s < NO_SQUARE;}
-	constexpr File fileOf(const Square sq) { return static_cast<File>(sq & 7); }
-	constexpr Rank rankOf(const Square sq) { return static_cast<Rank>(sq >> 3); }
-	constexpr Square makeSquare(const File f, const Rank r) { return static_cast<Square>((r << 3) | f); }
+	constexpr bool isSquare(const Square s) { return s >= SQUARE_ZERO && s < NO_SQUARE;}
+	constexpr File fileOf(const Square sq) { assert(isSquare(sq)); return static_cast<File>(sq & 7); }
+	constexpr Rank rankOf(const Square sq) { assert(isSquare(sq)); return static_cast<Rank>(sq >> 3); }
+	constexpr Square makeSquare(const File f, const Rank r) { assert(f < FILE_NB && r < RANK_NB); return static_cast<Square>((r << 3) | f); }
 
 	// Castling rights (can be combined with bitwise OR)
 	enum CastlingRights : int
@@ -131,11 +132,25 @@ namespace chess {
 		CASTLING_RIGHT_NB = 16
 	};
 
-#define ENABLE_INCR_OPERATORS_ON(T) \
-    inline T& operator++(T& d) noexcept  { return d = T(int(d) + 1); } \
-    inline T& operator--(T& d) noexcept  { return d = T(int(d) - 1); }
+	// In your header file only
+	template<typename T>
+	T& operator++(T& d) noexcept {
+		return d = static_cast<T>(static_cast<int>(d) + 1);
+	}
 
-	ENABLE_INCR_OPERATORS_ON(Square)
+	template<typename T>
+	T& operator--(T& d) noexcept {
+		return d = static_cast<T>(static_cast<int>(d) - 1);
+	}
+
+	// Instead of explicit instantiation, you can put these template specializations:
+	template<> inline Square& operator++(Square& d) noexcept {
+		return d = static_cast<Square>(static_cast<int>(d) + 1);
+	}
+
+	template<> inline Square& operator--(Square& d) noexcept {
+		return d = static_cast<Square>(static_cast<int>(d) - 1);
+	}
 
 
 

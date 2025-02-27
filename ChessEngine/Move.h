@@ -35,8 +35,23 @@ public:
 	constexpr static bool isPromotionFlag(const uint32_t moveData) noexcept { return (moveData >> 25) & 1; }
 	constexpr static bool isCastlingFlag(const uint32_t moveData) { return (moveData >> 26) & 1; }
 
-	bool operator==(const Move& other) const noexcept;
-	bool operator!=(const Move& other) const noexcept {return !(*this == other);}
+	friend bool operator==(const Move& lhs, const Move& rhs) noexcept {
+		// Quick check - if the raw data is identical, moves are identical
+		if (lhs.m_data == rhs.m_data) return true;
+
+		// Otherwise, check essential properties
+		return (lhs.getFrom() == rhs.getFrom() &&
+			lhs.getTo() == rhs.getTo() &&
+			lhs.getPiece() == rhs.getPiece() &&
+			lhs.getType() == rhs.getType() &&
+			// Only check promotion piece if either move is a promotion
+			((!lhs.isPromotion() && !rhs.isPromotion()) ||
+				lhs.getPromotionPiece() == rhs.getPromotionPiece()));
+	}
+
+	friend bool operator!=(const Move& lhs, const Move& rhs) noexcept {
+		return !(lhs == rhs);
+	}
 	// Set the move type
 	void setType(chess::MoveType type, chess::PieceType capturedPiece = chess::NO_PIECE_TYPE, chess::PieceType promotionPiece = chess::NO_PIECE_TYPE) noexcept;
 

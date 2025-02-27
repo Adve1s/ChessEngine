@@ -19,12 +19,10 @@ namespace chess {
 		}
 	};
 
-	class MagicNumberNotFoundException final : public std::runtime_error {
-	public:
-		explicit MagicNumberNotFoundException(const std::string& message)
-			: std::runtime_error(message) {}
+	struct MagicResult {
+		Bitboard magic;
+		bool success;
 	};
-
 
 	// Global arrays to store our magic data
 	extern std::array<Magic, SQUARE_NB>g_rookMagics;// One entry per square for rooks
@@ -41,7 +39,7 @@ namespace chess {
 	Bitboard getQueenAttacks(Square sq, Bitboard occupied);   // Get queen attacks (bishop + rook)
 
 	// Helper functions for initialization
-	Bitboard findMagic(Square square, PieceType pieceType, int bits);
+	MagicResult findMagic(Square square, PieceType pieceType, int bits);
 	Bitboard setOccupancy(int index, int bitsInMask, Bitboard mask);  // Helper to generate occupancy variations
 
 	// Functions to generate masks and raw attacks (used during initialization)

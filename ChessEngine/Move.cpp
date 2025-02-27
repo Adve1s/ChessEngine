@@ -12,6 +12,9 @@ Move::Move(const Square fromSquare, const Square toSquare, const PieceType piece
 		(static_cast<uint32_t>(PieceType::NO_PIECE_TYPE) << 15) |	// Set captured piece to NO_PIECE_TYPE (6) in bits 15-17
 														// Set move type to NORMAL (0) in bits 18-20 (This is already 0 since we initialized m_data to 0)
 		(static_cast<uint32_t>(PieceType::NO_PIECE_TYPE) << 21)) {	// Set promotion piece to NO_PIECE_TYPE (6) in bits 21-23
+	assert(isSquare(fromSquare) && "Invalid from square");
+	assert(isSquare(toSquare) && "Invalid to square");
+	assert(piece >= PieceType::PAWN && piece <= PieceType::KING && "Invalid piece type");
 	// All initialization is done
 }
 
@@ -24,6 +27,10 @@ Move::Move(const Square fromSquare, const Square toSquare, const PieceType piece
 		(static_cast<uint32_t>(chess::CAPTURE) << 18) |				// Set move type to CAPTURE (1) in bits 18-20
 		(static_cast<uint32_t>(PieceType::NO_PIECE_TYPE) << 21) |			// Set promotion piece to NO_PIECE_TYPE (6) in bits 21-23
 		(1u << 24)) {											// Capture flag
+	assert(isSquare(fromSquare) && "Invalid from square");
+	assert(isSquare(toSquare) && "Invalid to square");
+	assert(piece >= PieceType::PAWN && piece <= PieceType::KING && "Invalid piece type");
+	assert(capturedPiece >= PieceType::PAWN && capturedPiece <= PieceType::KING && "Invalid captured piece type");
 	// All initialization is done
 }
 
@@ -37,22 +44,12 @@ Move::Move(const Square fromSquare, const Square toSquare, const PieceType fromP
 		((static_cast<uint32_t>(toPiece) & 0x7) << 21) |							// Store promotion piece type in bits 21-23
 		(isCapture ? (1u << 24) : 0) |												// Set the capture flag in bit 24
 		(1u << 25)) {																// Promotion flag
+	assert(isSquare(fromSquare) && "Invalid from square");
+	assert(isSquare(toSquare) && "Invalid to square");
+	assert(fromPiece >= PieceType::PAWN && fromPiece <= PieceType::KING && "Invalid from piece type");
+	assert(toPiece > PieceType::PAWN && toPiece < PieceType::KING && "Invalid to piece type");
+	assert(capturedPiece >= PieceType::NO_PIECE_TYPE && capturedPiece <= PieceType::KING && "Invalid captured piece type");
 	// All initialization is done
-}
-
-bool Move::operator==(const Move& other) const noexcept
-{
-	// Quick check - if the raw data is identical, moves are identical
-	if (m_data == other.m_data) return true;
-
-	// Otherwise, check essential properties
-	return (getFrom() == other.getFrom() &&
-		getTo() == other.getTo() &&
-		getPiece() == other.getPiece() &&
-		getType() == other.getType() &&
-		// Only check promotion piece if either move is a promotion
-		((!isPromotion() && !other.isPromotion()) ||
-			getPromotionPiece() == other.getPromotionPiece()));
 }
 
 void Move::setType(const chess::MoveType type, const PieceType capturedPiece, const PieceType promotionPiece) noexcept
@@ -97,8 +94,8 @@ std::string Move::toString() const
 	std::stringstream ss;
 
 	// Get the square names
-	std::string fromStr = squareToString(Square::A1); //----------------------------------------------------------------------
-	std::string toStr = squareToString(Square::A2);
+	std::string fromStr ="A1"; //----------------------------------------------------------------------
+	std::string toStr = "A2";
 
 	// Piece letter (using standard notation: K, Q, R, B, N for pieces, nothing for pawns)
 	std::string pieceStr;
