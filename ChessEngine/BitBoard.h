@@ -4,14 +4,17 @@
 #include <gsl/narrow>
 #include "types.h"
 
+// Bitboard.h - Bitboard representation and operations for chess engine
+
 namespace chess {
 
+	// Initialization functions
 	void init();
 	void initSquareDistance();
 	void initBetweenThroughBB();
 	void initAttackBB();
 
-	// Constants for file masks
+	// File and rank masks for the chess board
 	constexpr Bitboard FILE_MASK_A = 0x0101010101010101ULL;
 	constexpr Bitboard FILE_MASK_B = FILE_MASK_A << 1;
 	constexpr Bitboard FILE_MASK_C = FILE_MASK_A << 2;
@@ -21,7 +24,6 @@ namespace chess {
 	constexpr Bitboard FILE_MASK_G = FILE_MASK_A << 6;
 	constexpr Bitboard FILE_MASK_H = FILE_MASK_A << 7;
 
-	// Constants for rank masks
 	constexpr Bitboard RANK_MASK_1 = 0xFF;
 	constexpr Bitboard RANK_MASK_2 = RANK_MASK_1 << (8 * 1);
 	constexpr Bitboard RANK_MASK_3 = RANK_MASK_1 << (8 * 2);
@@ -31,24 +33,27 @@ namespace chess {
 	constexpr Bitboard RANK_MASK_7 = RANK_MASK_1 << (8 * 6);
 	constexpr Bitboard RANK_MASK_8 = RANK_MASK_1 << (8 * 7);
 
-	extern std::array<std::array<Bitboard, SQUARE_NB>, SQUARE_NB> g_betweenBB;
-	extern std::array<std::array<Bitboard, SQUARE_NB>, SQUARE_NB> g_throughBB;
-	extern std::array<std::array<Bitboard, SQUARE_NB>, PIECE_TYPE_NB> g_pseudoAttacks;
-	extern std::array<std::array<Bitboard, SQUARE_NB>, COLOR_NB> g_pawnAttacks;
+	// Lookup tables for board calculations
+	extern std::array<std::array<Bitboard, SQUARE_NB>, SQUARE_NB> g_betweenBB;  // Squares between two points
+	extern std::array<std::array<Bitboard, SQUARE_NB>, SQUARE_NB> g_throughBB;  // Ray through two points
+	extern std::array<std::array<Bitboard, SQUARE_NB>, PIECE_TYPE_NB> g_pseudoAttacks;  // Attack patterns by piece
+	extern std::array<std::array<Bitboard, SQUARE_NB>, COLOR_NB> g_pawnAttacks;  // Pawn attacks by color
+	extern std::array<std::array<uint8_t, SQUARE_NB>, SQUARE_NB> g_squareDistance;  // Distance between squares
 
-	extern std::array<std::array<uint8_t, SQUARE_NB>, SQUARE_NB> g_squareDistance;
-
+	// Helper to determine if step is possible for current square
 	Bitboard insideBoard(Square square,int step);
 
 	// Helper to determine the direction between two squares
 	Direction getDirection(Square from, Square to);
 
+	// Gets pawn attack pattern for specified color
 	template<Color C>
 	constexpr Bitboard pawnAttack(const Square square) {
 		return C == WHITE ? insideBoard(square, NORTH_WEST) | insideBoard(square, NORTH_EAST)
 			: insideBoard(square, SOUTH_WEST) | insideBoard(square, SOUTH_EAST);
 	}
 
+	// Distance is used to calculate distance between ranks, files or look up distance between squares
 	template<typename T>
 	int distance(const Square x, const Square y) noexcept {
 		if constexpr (std::is_same_v<T, File>) {
@@ -70,24 +75,25 @@ namespace chess {
 		}
 	}
 
-	// Core bitboard operations
+	// Sets a bit in the bitboard
 	inline void setBit(Bitboard& board,const Square square) {
 		assert(isSquare(square));
 		board |= (1ULL << square);
 	}
 
+	// Clears a bit in the bitboard
 	inline void clearBit(Bitboard& board,const Square square) {
 		assert(isSquare(square));
 		board &= ~(1ULL << square);
 	}
 
-	// Query methods
+	// Checks if a square is empty in the bitboard
 	constexpr bool isSquareEmpty(const Bitboard board, const Square square) {
 		assert(isSquare(square));
 		return !(board & (1ULL << square));
 	}
 
-	// Utility methods for bitboard manipulation
+	// Creates a bitboard with just one square set
 	constexpr Bitboard squareToBB(const Square square) {
 		assert(isSquare(square));
 		return 1ULL << square;
@@ -109,23 +115,25 @@ namespace chess {
 		return static_cast<Square>(index);
 	}
 
-	// Get and clear the least significant bit
+	// Gets and removes the least significant bit
 	inline Square popLsb(Bitboard& b) noexcept {
 		assert(b);                    // Fail fast if empty
-		const auto s = lsb(b);  // Reuse lsb() function
-		// (x & (x-1)) clears the least significant set bit
+		const auto s = lsb(b);        // Get LSB
 		b &= b - 1;                   // Clear LSB
 		return s;
 	}
 
+	// Counts the number of set bits
 	inline int popCount(const Bitboard board) noexcept {
 		return gsl::narrow_cast<int>(__popcnt64(board));
 	}
 
-	// Debug methods
+	// Debug function to print a bitboard
 	void printBitBoard(Bitboard board);
 
-	// Helper functions - declared here, defined in cpp file
+	// Converts square to string (e.g., "e4")
 	std::string squareToString(Square square);
+
+	// Converts string to square (e.g., "e4" -> 28)
 	int stringToSquare(const std::string& squareStr);
 }

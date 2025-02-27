@@ -2,49 +2,49 @@
 #include <gsl/narrow>
 #include "Types.h"
 
-namespace chess {
-	struct Magic {
-		Bitboard mask;      // Relevant occupancy mask - these are the squares that matter for this piece at this position
-		Bitboard* attacks;  // Pointer to the location in the attacks table where this square's data begins
-		Bitboard magic;     // The "magic" multiplier that creates a perfect hash
-		int shift;          // How many bits to shift right after multiplication
+// MagicBB.h - Magic bitboard implementation for fast sliding piece move generation
 
-		// Calculate index into attacks table
+namespace chess {
+	// Magic bitboard structure
+	struct Magic {
+		Bitboard mask;      // Relevant occupancy mask for this square
+		Bitboard* attacks;  // Pointer to attacks table for this square
+		Bitboard magic;     // Magic multiplier for perfect hash
+		int shift;          // Shift amount for the index
+
+		// Calculate the attacks table index for a given occupancy
 		inline unsigned int getIndex(Bitboard occupied) const noexcept {
-			// This is the core of the magic bitboard technique:
-			// 1. Filter the occupied squares to only those that matter (the mask)
-			// 2. Multiply by the magic number to create a unique pattern
-			// 3. Shift right to compress into an index
 			return gsl::narrow_cast<unsigned int>(((occupied & mask) * magic) >> shift);
 		}
 	};
 
+	// Result of a magic number search
 	struct MagicResult {
-		Bitboard magic;
-		bool success;
+		Bitboard magic;  // The magic number found
+		bool success;    // Whether a suitable magic was found
 	};
 
-	// Global arrays to store our magic data
-	extern std::array<Magic, SQUARE_NB>g_rookMagics;// One entry per square for rooks
-	extern std::array<Magic, SQUARE_NB>g_bishopMagics;    // One entry per square for bishops
-	extern std::array<Bitboard, 0x19000>g_rookTable;      // Table for rook attacks (size based on Stockfish)
-	extern std::array<Bitboard, 0x1480>g_bishopTable;     // Table for bishop attacks (size based on Stockfish)
+	// Global arrays for magic bitboards
+	extern std::array<Magic, SQUARE_NB> g_rookMagics;     // Rook magic data for each square
+	extern std::array<Magic, SQUARE_NB> g_bishopMagics;   // Bishop magic data for each square
+	extern std::array<Bitboard, 0x19000> g_rookTable;     // Rook attacks lookup table
+	extern std::array<Bitboard, 0x1480> g_bishopTable;    // Bishop attacks lookup table
 
 	// Function declarations
 	void initMagicBitboards();  // Initialize all the magic bitboard tables
 
-	// Core lookup functions you'll use during move generation
-	Bitboard getBishopAttacks(Square sq, Bitboard occupied);  // Get bishop attacks with magic lookup
-	Bitboard getRookAttacks(Square sq, Bitboard occupied);    // Get rook attacks with magic lookup
-	Bitboard getQueenAttacks(Square sq, Bitboard occupied);   // Get queen attacks (bishop + rook)
+	// Get attacks for sliding pieces using magic bitboards
+	Bitboard getBishopAttacks(Square sq, Bitboard occupied);  // Bishop attacks
+	Bitboard getRookAttacks(Square sq, Bitboard occupied);    // Rook attacks
+	Bitboard getQueenAttacks(Square sq, Bitboard occupied);   // Queen attacks (bishop + rook)
 
 	// Helper functions for initialization
-	MagicResult findMagic(Square square, PieceType pieceType, int bits);
-	Bitboard setOccupancy(int index, int bitsInMask, Bitboard mask);  // Helper to generate occupancy variations
+	MagicResult findMagic(Square square, PieceType pieceType, int bits);  // Find a magic number
+	Bitboard setOccupancy(int index, int bitsInMask, Bitboard mask);      // Generate occupancy variation
 
-	// Functions to generate masks and raw attacks (used during initialization)
-	Bitboard generateBishopMask(Square sq);    // Generate the relevant squares mask for a bishop
-	Bitboard generateRookMask(Square sq);      // Generate the relevant squares mask for a rook
+	// Functions to generate masks and attacks
+	Bitboard generateBishopMask(Square sq);                     // Generate bishop relevant squares mask
+	Bitboard generateRookMask(Square sq);                       // Generate rook relevant squares mask
 	Bitboard generateBishopAttacks(Square sq, Bitboard occupied);  // Calculate bishop attacks directly
 	Bitboard generateRookAttacks(Square sq, Bitboard occupied);    // Calculate rook attacks directly
 }

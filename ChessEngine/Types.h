@@ -3,9 +3,11 @@
 #include <cstdint>
 #include <cassert>
 
+// Types.h - Core types and constants for the chess engine
+
 namespace chess {
 
-	// Define the bitboard type
+	// 64-bit unsigned integer representing a chess board
 	using Bitboard = uint64_t;
 
 	// Piece types
@@ -16,6 +18,7 @@ namespace chess {
 		PIECE_TYPE_NB = 8
 	};
 
+	// Pieces (combines piece type and color)
 	enum Piece : int
 	{
 		NO_PIECE,      // = 0 (first enum value defaults to 0)
@@ -132,7 +135,7 @@ namespace chess {
 		CASTLING_RIGHT_NB = 16
 	};
 
-	// In your header file only
+	// Operator overloads for enum types
 	template<typename T>
 	T& operator++(T& d) noexcept {
 		return d = static_cast<T>(static_cast<int>(d) + 1);
@@ -143,7 +146,7 @@ namespace chess {
 		return d = static_cast<T>(static_cast<int>(d) - 1);
 	}
 
-	// Instead of explicit instantiation, you can put these template specializations:
+	// Explicit specializations for Square
 	template<> inline Square& operator++(Square& d) noexcept {
 		return d = static_cast<Square>(static_cast<int>(d) + 1);
 	}

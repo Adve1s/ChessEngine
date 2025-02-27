@@ -11,27 +11,6 @@ int main()
 	chess::init();
 	chess::tests::runAllMagicBBTests();
 	chess::tests::runAllBitBoardTests();
-	/***
-	printBitBoard(g_throughBB[D4][F6]);
-	printBitBoard(g_throughBB[F4][D4]);
-	printBitBoard(g_throughBB[D4][D6]);
-	printBitBoard(g_throughBB[D4][C1]);
-	printBitBoard(g_throughBB[A1][A1]);
-
-	printBitBoard(g_betweenBB[D4][F6]);
-	printBitBoard(g_betweenBB[F4][D4]);
-	printBitBoard(g_betweenBB[D4][D6]);
-	printBitBoard(g_betweenBB[D4][C1]);
-	printBitBoard(g_betweenBB[A1][A1]);
-
-	printBitBoard(g_pawnAttacks[WHITE][A1]);
-	printBitBoard(g_pawnAttacks[BLACK][A1]);
-	printBitBoard(g_pseudoAttacks[KNIGHT][A1]);
-	printBitBoard(g_pseudoAttacks[BISHOP][A1]);
-	printBitBoard(g_pseudoAttacks[ROOK][A1]);
-	printBitBoard(g_pseudoAttacks[QUEEN][A1]);
-	printBitBoard(g_pseudoAttacks[KING][A1]);
-	***/
 	return 0;
 }
 

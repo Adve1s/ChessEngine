@@ -4,18 +4,19 @@
 using chess::Square;
 using chess::PieceType;
 
-// Constructor with basic move information
+// Move.cpp - Implementation of chess move operations
+
+// Constructor for basic moves
 Move::Move(const Square fromSquare, const Square toSquare, const PieceType piece) noexcept :
 	m_data((fromSquare & 0x3F) |						// Store from square in bits 0-5
 		((toSquare & 0x3F) << 6) |						// Store to square in bits 6-11
 		((static_cast<uint32_t>(piece) & 0x7) << 12) |	// Store piece type in bits 12-14
-		(static_cast<uint32_t>(PieceType::NO_PIECE_TYPE) << 15) |	// Set captured piece to NO_PIECE_TYPE (6) in bits 15-17
-														// Set move type to NORMAL (0) in bits 18-20 (This is already 0 since we initialized m_data to 0)
-		(static_cast<uint32_t>(PieceType::NO_PIECE_TYPE) << 21)) {	// Set promotion piece to NO_PIECE_TYPE (6) in bits 21-23
+		(static_cast<uint32_t>(PieceType::NO_PIECE_TYPE) << 15) |	// Set captured piece to NO_PIECE_TYPE
+									// Move type defaults to NORMAL (0)
+		(static_cast<uint32_t>(PieceType::NO_PIECE_TYPE) << 21)) {	// Set promotion piece to NO_PIECE_TYPE
 	assert(isSquare(fromSquare) && "Invalid from square");
 	assert(isSquare(toSquare) && "Invalid to square");
 	assert(piece >= PieceType::PAWN && piece <= PieceType::KING && "Invalid piece type");
-	// All initialization is done
 }
 
 // Constructor for captures
@@ -24,14 +25,13 @@ Move::Move(const Square fromSquare, const Square toSquare, const PieceType piece
 		((toSquare & 0x3F) << 6) |								// Store to square in bits 6-11
 		((static_cast<uint32_t>(piece) & 0x7) << 12) |			// Store piece type in bits 12-14
 		((static_cast<uint32_t>(capturedPiece) & 0x7) << 15) |	// Store captured piece type in bits 15-17
-		(static_cast<uint32_t>(chess::CAPTURE) << 18) |				// Set move type to CAPTURE (1) in bits 18-20
-		(static_cast<uint32_t>(PieceType::NO_PIECE_TYPE) << 21) |			// Set promotion piece to NO_PIECE_TYPE (6) in bits 21-23
-		(1u << 24)) {											// Capture flag
+		(static_cast<uint32_t>(chess::CAPTURE) << 18) |			// Set move type to CAPTURE
+		(static_cast<uint32_t>(PieceType::NO_PIECE_TYPE) << 21)|// Set promotion piece to NO_PIECE_TYPE
+		(1u << 24)) {											// Set capture flag
 	assert(isSquare(fromSquare) && "Invalid from square");
 	assert(isSquare(toSquare) && "Invalid to square");
 	assert(piece >= PieceType::PAWN && piece <= PieceType::KING && "Invalid piece type");
 	assert(capturedPiece >= PieceType::PAWN && capturedPiece <= PieceType::KING && "Invalid captured piece type");
-	// All initialization is done
 }
 
 // Constructor for promotions
@@ -40,18 +40,18 @@ Move::Move(const Square fromSquare, const Square toSquare, const PieceType fromP
 		((toSquare & 0x3F) << 6) |													// Store to square in bits 6-11
 		((static_cast<uint32_t>(fromPiece) & 0x7) << 12) |							// Store piece type in bits 12-14
 		((static_cast<uint32_t>(capturedPiece) & 0x7) << 15) |						// Store captured piece type in bits 15-17
-		((static_cast<uint32_t>(isCapture ? chess::PROMOTION_CAPTURE : chess::PROMOTION)) << 18) |// Set move type to PROMOTION_CAPTURE (7) in bits 18-20
+		((static_cast<uint32_t>(isCapture ? chess::PROMOTION_CAPTURE : chess::PROMOTION)) << 18) |// Set move type
 		((static_cast<uint32_t>(toPiece) & 0x7) << 21) |							// Store promotion piece type in bits 21-23
-		(isCapture ? (1u << 24) : 0) |												// Set the capture flag in bit 24
-		(1u << 25)) {																// Promotion flag
+		(isCapture ? (1u << 24) : 0) |												// Set the capture flag if needed
+		(1u << 25)) {																// Set promotion flag
 	assert(isSquare(fromSquare) && "Invalid from square");
 	assert(isSquare(toSquare) && "Invalid to square");
 	assert(fromPiece >= PieceType::PAWN && fromPiece <= PieceType::KING && "Invalid from piece type");
 	assert(toPiece > PieceType::PAWN && toPiece < PieceType::KING && "Invalid to piece type");
 	assert(capturedPiece >= PieceType::NO_PIECE_TYPE && capturedPiece <= PieceType::KING && "Invalid captured piece type");
-	// All initialization is done
 }
 
+// Set the move type and update related flags
 void Move::setType(const chess::MoveType type, const PieceType capturedPiece, const PieceType promotionPiece) noexcept
 {
 	// Clear the old move type bits (bits 18-20)
@@ -62,7 +62,6 @@ void Move::setType(const chess::MoveType type, const PieceType capturedPiece, co
 
 	// Clear all flag bits (bits 24-26)
 	m_data &= ~(0x7u << 24);
-
 	// Clear captured piece bits (bits 15-17)
 	m_data &= ~(0x7u << 15);
 	// Clear promotion piece bits (bits 21-23)
@@ -88,14 +87,14 @@ void Move::setType(const chess::MoveType type, const PieceType capturedPiece, co
 	m_data |= FLAG_PATTERNS.at(type);
 }
 
-// Convert move to string for output
+// Convert move to string for output and display
 std::string Move::toString() const
 {
 	std::stringstream ss;
 
 	// Get the square names
-	std::string fromStr ="A1"; //----------------------------------------------------------------------
-	std::string toStr = "A2";
+	std::string fromStr = "A1"; //TODO: Fix squareToString
+	std::string toStr = "A2";   //TODO: Fix squareToString
 
 	// Piece letter (using standard notation: K, Q, R, B, N for pieces, nothing for pawns)
 	std::string pieceStr;

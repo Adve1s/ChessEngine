@@ -2,22 +2,24 @@
 #include <string>
 #include "Types.h"
 
+// Move.h - Chess move representation and operations
+
 class Move
 {
 public:
-	// Constructor with basic move information
+	// Default constructor - creates an empty/null move
 	Move() noexcept : m_data(0) {}
 
-	// Constructor with basic move information
+	// Constructor for basic moves
 	Move(chess::Square fromSquare, chess::Square toSquare, chess::PieceType piece) noexcept;
 
 	// Constructor for captures
 	Move(chess::Square fromSquare, chess::Square toSquare, chess::PieceType piece, chess::PieceType capturedPiece) noexcept;
 
-	// Constructor for promotions
+	// Constructor for promotions (with optional capture)
 	Move(chess::Square fromSquare, chess::Square toSquare, chess::PieceType fromPiece, chess::PieceType toPiece, bool isCapture = false, chess::PieceType capturedPiece = chess::NO_PIECE_TYPE) noexcept;
 
-	// Getters
+	// Getters for move information
 	int getFrom() const noexcept { return m_data & 0x3F; }
 	int getTo() const noexcept { return (m_data >> 6) & 0x3F; }
 	chess::PieceType getPiece() const noexcept { return static_cast<chess::PieceType>((m_data >> 12) & 0x7); }
@@ -25,16 +27,17 @@ public:
 	chess::PieceType getCapturedPiece() const noexcept { return static_cast<chess::PieceType>((m_data >> 15) & 0x7); }
 	chess::PieceType getPromotionPiece() const noexcept { return static_cast<chess::PieceType>((m_data >> 21) & 0x7); }
 
-	// Object-oriented methods (for working with Move objects)
+	// Move property checks
 	bool isCapture() const noexcept { return isCaptureFlag(m_data); }
 	bool isPromotion() const noexcept { return isPromotionFlag(m_data); }
 	bool isCastling() const { return isCastlingFlag(m_data); }
 
-	// Static utility methods (for working with raw move data)
+	// Static flag checking methods
 	constexpr static bool isCaptureFlag(const uint32_t moveData) noexcept { return (moveData >> 24) & 1; }
 	constexpr static bool isPromotionFlag(const uint32_t moveData) noexcept { return (moveData >> 25) & 1; }
 	constexpr static bool isCastlingFlag(const uint32_t moveData) { return (moveData >> 26) & 1; }
 
+	// Comparison operators
 	friend bool operator==(const Move& lhs, const Move& rhs) noexcept {
 		// Quick check - if the raw data is identical, moves are identical
 		if (lhs.m_data == rhs.m_data) return true;
@@ -52,10 +55,11 @@ public:
 	friend bool operator!=(const Move& lhs, const Move& rhs) noexcept {
 		return !(lhs == rhs);
 	}
-	// Set the move type
+
+	// Set move type (and update flags)
 	void setType(chess::MoveType type, chess::PieceType capturedPiece = chess::NO_PIECE_TYPE, chess::PieceType promotionPiece = chess::NO_PIECE_TYPE) noexcept;
 
-	// For printing/debugging
+	// Convert move to string representation
 	std::string toString() const;
 
 private:
