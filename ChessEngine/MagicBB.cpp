@@ -8,6 +8,55 @@
 
 namespace chess {
 
+	// Global arrays for magic bitboards
+	std::array<Magic, SQUARE_NB> g_rookMagics;     // Rook magic data for each square
+	std::array<Magic, SQUARE_NB> g_bishopMagics;   // Bishop magic data for each square
+	std::array<Bitboard, 0x19000> g_rookTable;     // Rook attacks lookup table
+	std::array<Bitboard, 0x1480> g_bishopTable;    // Bishop attacks lookup table
+
+	void initMagicBitboards()
+	{
+		initMagics(BISHOP);
+		initMagics(ROOK);
+	}
+
+	// Initialize magic bitboards for a piece type
+	void initMagics(const PieceType piece)
+	{
+		assert(piece == ROOK || piece == BISHOP);
+		// Clear the attack table before filling
+		if (piece == BISHOP) std::ranges::fill(g_bishopTable, 0);
+		else std::ranges::fill(g_rookTable, 0);
+		int offSet = 0;
+		for (Square sq = A1; sq < SQUARE_NB; ++sq) {
+			assert(isSquare(sq));
+			std::cout << "doing this square: " << sq << "\n";
+			Magic& currMagic = (piece == BISHOP) ? g_bishopMagics.at(sq) : g_rookMagics.at(sq);
+			// Generate mask of relevant squares
+			currMagic.mask = (piece == BISHOP) ? generateBishopMask(sq) : generateRookMask(sq);
+			const int bits = popCount(currMagic.mask);
+			currMagic.shift = 64 - bits;
+			// Find a magic number that creates perfect hash
+			const MagicResult magicResult = (piece == BISHOP) ? findMagic(sq, BISHOP) : findMagic(sq, ROOK);
+			assert(magicResult.success);
+			currMagic.magic = magicResult.magic;
+			const int variations = 1 << bits;
+			// Set up span to point to the right segment of the table
+			currMagic.attacks = (piece == BISHOP) ? gsl::span(&g_bishopTable.at(offSet), variations) : gsl::span(&g_rookTable.at(offSet), variations);
+			offSet += variations;
+			std::cout << "magic: " << currMagic.magic << "\n";
+			// Fill the attack table for all possible occupancy patterns
+			for (int index = 0; index < variations; ++index)
+			{
+				const Bitboard occupancy = setOccupancy(index, bits, currMagic.mask);
+				const unsigned int magicIndex = currMagic.getIndex(occupancy);
+				const Bitboard attacks = (piece == BISHOP) ? generateBishopAttacks(sq, occupancy) : generateRookAttacks(sq, occupancy);
+				assert(attacks);
+				currMagic.attacks[magicIndex] = attacks;
+			}
+		}
+	}
+
 	// Generate bishop mask (excludes edges and the source square)
 	Bitboard generateBishopMask(const Square sq)
 	{
@@ -22,7 +71,7 @@ namespace chess {
 				if (edges & next)
 					break; // Stop at board edge
 				mask |= next;
-				temp = static_cast<Square>(temp + d);
+				temp = temp + d;
 			}
 		}
 		assert(!(mask & squareToBB(sq)));
@@ -48,7 +97,7 @@ namespace chess {
 				if (edge & next)
 					break; // Stop at board edge
 				mask |= next;
-				temp = static_cast<Square>(temp + d);
+				temp = temp + d;
 			}
 		}
 		assert(!(mask & squareToBB(sq)));
@@ -68,7 +117,7 @@ namespace chess {
 				attacks |= next;
 				if (occupied & next)
 					break; // Stop at blocking piece
-				temp = static_cast<Square>(temp + d);
+				temp = temp + d;
 			}
 		}
 		assert(!(attacks & squareToBB(sq)));
@@ -87,7 +136,7 @@ namespace chess {
 				attacks |= next;
 				if (occupied & next)
 					break; // Stop at blocking piece
-				temp = static_cast<Square>(temp + d);
+				temp = temp + d;
 			}
 		}
 		assert(!(attacks & squareToBB(sq)));
@@ -110,7 +159,7 @@ namespace chess {
 	}
 
 	// Find a magic number for the given square and piece type
-	MagicResult findMagic(Square square, PieceType pieceType, int bits) {
+	MagicResult findMagic(Square square, PieceType pieceType) {
 		assert(isSquare(square) && "Invalid square");
 		assert(pieceType >= PieceType::PAWN && pieceType <= PieceType::KING && "Invalid piece type");
 
@@ -144,14 +193,14 @@ namespace chess {
 			// Check if magic has good properties
 			if (popCount((mask * magic) >> 56) < 6) continue;
 			// Test this magic number for collisions
-			std::vector<Bitboard> usedAttacks(1ULL << bits, 0);
-			std::vector<bool> used(1ULL << bits, false);
+			std::vector<Bitboard> usedAttacks(1ULL << maskBits, 0);
+			std::vector<bool> used(1ULL << maskBits, false);
 
 			bool failed = false;
 			// Check all occupancy variations
 			for (int i = 0; i < occupancyCount && !failed; i++) {
 				// Calculate index using the magic number
-				const Bitboard index = (occupancies.at(i) * magic) >> (64 - bits);
+				const Bitboard index = (occupancies.at(i) * magic) >> (64 - maskBits);
 
 				if (!used.at(index)) {
 					// New index - store the attacks
@@ -166,10 +215,32 @@ namespace chess {
 			// If no collisions, we found a valid magic
 			if (!failed) {
 				assert(magic);
-				return { magic, true };
+				return { magic,true };
 			}
 		}
 		// Failed to find a magic
 		return { 0, false };
+	}
+
+	// Gets bishop attacks for a square using magic bitboards
+	Bitboard getBishopAttacks(Square sq, Bitboard occupied) {
+		assert(isSquare(sq));
+		const Magic& magic = g_bishopMagics.at(sq);
+		// Get index from magic multiplication
+		const unsigned int index = magic.getIndex(occupied & magic.mask);
+		return magic.attacks[index];
+	}
+
+	Bitboard getRookAttacks(Square sq, Bitboard occupied) {
+		assert(isSquare(sq));
+		const Magic& magic = g_rookMagics.at(sq);
+		// Get index from magic multiplication
+		const unsigned int index = magic.getIndex(occupied & magic.mask);
+		return magic.attacks[index];
+	}
+
+	// Gets queen attacks (combination of bishop and rook attacks)
+	Bitboard getQueenAttacks(Square sq, Bitboard occupied) {
+		return getBishopAttacks(sq, occupied) | getRookAttacks(sq, occupied);
 	}
 }

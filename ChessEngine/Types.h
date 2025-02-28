@@ -135,6 +135,11 @@ namespace chess {
 		CASTLING_RIGHT_NB = 16
 	};
 
+	// Operator overload
+	inline Square operator+(const Square sq,const Direction dir) noexcept{
+		return static_cast<Square>(static_cast<int>(sq) + static_cast<int>(dir));
+	}
+
 	// Operator overloads for enum types
 	template<typename T>
 	T& operator++(T& d) noexcept {
@@ -154,8 +159,6 @@ namespace chess {
 	template<> inline Square& operator--(Square& d) noexcept {
 		return d = static_cast<Square>(static_cast<int>(d) - 1);
 	}
-
-
 
 	// Helper to report test results
 	inline void report(const std::string& testName, bool success) {

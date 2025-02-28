@@ -1,16 +1,15 @@
 #pragma once
-#include <gsl/narrow>
 #include "Types.h"
-
+#include <gsl/span>
 // MagicBB.h - Magic bitboard implementation for fast sliding piece move generation
 
 namespace chess {
 	// Magic bitboard structure
 	struct Magic {
-		Bitboard mask;      // Relevant occupancy mask for this square
-		Bitboard* attacks;  // Pointer to attacks table for this square
-		Bitboard magic;     // Magic multiplier for perfect hash
-		int shift;          // Shift amount for the index
+		Bitboard mask = 0;      // Relevant occupancy mask for this square
+		gsl::span<Bitboard> attacks;  // Pointer to attacks table for this square
+		Bitboard magic = 0;     // Magic multiplier for perfect hash
+		int shift= 0;          // Shift amount for the index
 
 		// Calculate the attacks table index for a given occupancy
 		inline unsigned int getIndex(Bitboard occupied) const noexcept {
@@ -31,6 +30,7 @@ namespace chess {
 	extern std::array<Bitboard, 0x1480> g_bishopTable;    // Bishop attacks lookup table
 
 	// Function declarations
+	void initMagics(PieceType piece);	// Initialize bishop or rook magics
 	void initMagicBitboards();  // Initialize all the magic bitboard tables
 
 	// Get attacks for sliding pieces using magic bitboards
@@ -39,7 +39,7 @@ namespace chess {
 	Bitboard getQueenAttacks(Square sq, Bitboard occupied);   // Queen attacks (bishop + rook)
 
 	// Helper functions for initialization
-	MagicResult findMagic(Square square, PieceType pieceType, int bits);  // Find a magic number
+	MagicResult findMagic(Square square, PieceType pieceType);  // Find a magic number
 	Bitboard setOccupancy(int index, int bitsInMask, Bitboard mask);      // Generate occupancy variation
 
 	// Functions to generate masks and attacks

@@ -1,4 +1,6 @@
 #include "MagicBBTests.h"
+
+#include <format>
 #include <iostream>
 #include <vector>
 
@@ -280,14 +282,13 @@ namespace chess {
 			bool success = false;
 			// Test a corner square first (fewer relevant bits)
 			constexpr Square testSquare = A1;
-			constexpr int indexBits = 6;
 
 			std::cout << "Attempting to find bishop magic for square A1..." << "\n";
-			const MagicResult bishopMagic = findMagic(testSquare, BISHOP, indexBits);
+			const MagicResult bishopMagic = findMagic(testSquare, BISHOP);
 
 			if (bishopMagic.success) {
 				success = true;
-				std::cout << "Found bishop magic number: 0x" << std::hex << bishopMagic.magic << std::dec << "\n";
+				std::cout << std::format("Found bishop magic number: {:#x}\n", bishopMagic.magic);
 			}
 
 			report("findMagic function", success);
@@ -295,20 +296,18 @@ namespace chess {
 
 		// First function: Tests basic magic number generation
 		void testMagicNumberGeneration() {
-			std::cout << "Testing Magic Number Generation..." << "\n";
 			// Define a variety of test cases
 			struct TestCase {
 				Square square;
 				PieceType pieceType;
-				int indexBits;
 				std::string description;
 			};
 
 			std::vector<TestCase> testCases = {
-				{A1, BISHOP, 6, "Bishop on corner (A1)"},
-				{H1, BISHOP, 6, "Bishop on corner (H1)"},
-				{A1, ROOK, 12, "Rook on corner (A1)"},
-				{D4, BISHOP, 9, "Bishop near center (D4)"}
+				{A1, BISHOP, "Bishop on corner (A1)"},
+				{H1, BISHOP, "Bishop on corner (H1)"},
+				{A1, ROOK, "Rook on corner (A1)"},
+				{D4, BISHOP, "Bishop near center (D4)"}
 			};
 
 			bool overallSuccess = true;
@@ -317,7 +316,7 @@ namespace chess {
 				bool success = true;
 				std::cout << "  Testing " << test.description << "..." << "\n";
 				// Find magic number for this test case
-				const MagicResult magic = findMagic(test.square, test.pieceType, test.indexBits);
+				const MagicResult magic = findMagic(test.square, test.pieceType);
 
 				if (!magic.success) {
 					std::cout << "    Failed: Got zero magic number" << "\n";
@@ -325,7 +324,7 @@ namespace chess {
 				}
 				else {
 					// Print the found magic in hex format
-					std::cout << "    Found magic: 0x" << std::hex << magic.magic << std::dec << "\n";
+					std::cout << std::format("    Found magic: {:#x}\n", magic.magic);
 					success = true;
 				}
 				report(test.description, success);
@@ -336,14 +335,14 @@ namespace chess {
 		}
 
 		// Helper function to verify a magic number (moved from inside the test)
-		bool verifyMagic(Square square, PieceType pieceType, int indexBits, Bitboard magic) {
+		bool verifyMagic(Square square, PieceType pieceType, Bitboard magic) {
 			// Generate the appropriate mask for the piece type and square
 			const Bitboard mask = (pieceType == BISHOP) ?
 				generateBishopMask(square) :
 				generateRookMask(square);
 
-			const int maskBits = popCount(mask);
-			const int occupancyCount = 1 << maskBits;
+			const int bits = popCount(mask);
+			const int occupancyCount = 1 << bits;
 
 			// Only test a subset of all occupancies to keep the test fast
 			// We'll test at most 100 patterns, evenly distributed
@@ -356,7 +355,7 @@ namespace chess {
 				testedCount++;
 
 				// Generate an occupancy pattern
-				const Bitboard occ = setOccupancy(i, maskBits, mask);
+				const Bitboard occ = setOccupancy(i, bits, mask);
 
 				// Calculate the expected attacks for this occupancy
 				const Bitboard attacks = (pieceType == BISHOP) ?
@@ -364,7 +363,7 @@ namespace chess {
 					generateRookAttacks(square, occ);
 
 				// Calculate index using the magic number
-				const Bitboard index = (occ * magic) >> (64 - indexBits);
+				const Bitboard index = (occ * magic) >> (64 - bits);
 
 				// Check for collision with previous entries
 				for (const auto& [prevIndex, prevAttacks] : indexToAttacks) {
@@ -383,20 +382,18 @@ namespace chess {
 
 		// Second function: Verifies that the generated magic numbers work correctly
 		void testMagicNumberVerification() {
-			std::cout << "Testing Magic Number Verification..." << "\n";
 
 			// Similar test case structure as before
 			struct TestCase {
 				Square square;
 				PieceType pieceType;
-				int indexBits;
 				std::string description;
 			};
 
 			std::vector<TestCase> testCases = {
-				{A1, BISHOP, 6, "Bishop on corner (A1)"},
-				{D4, BISHOP, 9, "Bishop near center (D4)"},
-				{A1, ROOK, 12, "Rook on corner (A1)"}
+				{A1, BISHOP, "Bishop on corner (A1)"},
+				{D4, BISHOP, "Bishop near center (D4)"},
+				{A1, ROOK, "Rook on corner (A1)"}
 			};
 
 			bool overallSuccess = true;
@@ -405,7 +402,7 @@ namespace chess {
 				bool success = true;
 				std::cout << "  Verifying " << test.description << "..." << "\n";
 				// Get magic number first
-				const MagicResult magic = findMagic(test.square, test.pieceType, test.indexBits);
+				const MagicResult magic = findMagic(test.square, test.pieceType);
 
 				if (!magic.success) {
 					std::cout << "    Skipping verification: Invalid magic number" << "\n";
@@ -413,13 +410,145 @@ namespace chess {
 				}
 				else {
 					// Verify the magic number works by checking for collisions
-					success = verifyMagic(test.square, test.pieceType, test.indexBits, magic.magic);
+					success = verifyMagic(test.square, test.pieceType, magic.magic);
 				}
 				report(test.description + " verification", success);
 				overallSuccess &= success;
 			}
 
 			report("Magic Number Verification", overallSuccess);
+		}
+
+		// Test attack lookup functions using magic bitboards
+		void testMagicAttackFunctions()
+		{
+
+			// Initialize an empty board for testing
+			constexpr Bitboard emptyBoard = 0;
+
+			bool success = true;
+
+			// Test bishop attacks from center square (D4)
+			const Bitboard d4BishopAttacksMagic = getBishopAttacks(D4, emptyBoard);
+			const Bitboard d4BishopAttacksDirect = generateBishopAttacks(D4, emptyBoard);
+
+			// Verify that magic lookup gives same result as direct calculation
+			success &= (d4BishopAttacksMagic == d4BishopAttacksDirect);
+			success &= (popCount(d4BishopAttacksMagic) == 13); // Bishop on D4 attacks 13 squares
+
+			// Test rook attacks from center square (E4)
+			const Bitboard e4RookAttacksMagic = getRookAttacks(E4, emptyBoard);
+			const Bitboard e4RookAttacksDirect = generateRookAttacks(E4, emptyBoard);
+
+			// Verify that magic lookup gives same result as direct calculation
+			success &= (e4RookAttacksMagic == e4RookAttacksDirect);
+			success &= (popCount(e4RookAttacksMagic) == 14); // Rook on E4 attacks 14 squares
+
+			// Test queen attacks (combined bishop and rook)
+			const Bitboard e4QueenAttacksMagic = getQueenAttacks(E4, emptyBoard);
+			const Bitboard e4QueenAttacksDirect = generateBishopAttacks(E4, emptyBoard) | generateRookAttacks(E4, emptyBoard);
+
+			success &= (e4QueenAttacksMagic == e4QueenAttacksDirect);
+			success &= (popCount(e4QueenAttacksMagic) == 27); // Queen attacks 27 squares from E4
+
+			// Test with blocking pieces
+			Bitboard blockedBoard = 0;
+			setBit(blockedBoard, C3); // Block SW diagonal
+			setBit(blockedBoard, E2); // Block South
+
+			// Test bishop attacks with blocking pieces
+			const Bitboard d4BishopBlockedMagic = getBishopAttacks(D4, blockedBoard);
+			const Bitboard d4BishopBlockedDirect = generateBishopAttacks(D4, blockedBoard);
+
+			success &= (d4BishopBlockedMagic == d4BishopBlockedDirect);
+			success &= (d4BishopBlockedMagic & squareToBB(C3)) != 0; // Should include blocker
+			success &= (d4BishopBlockedMagic & squareToBB(B2)) == 0; // Shouldn't go beyond blocker
+
+			// Test rook attacks with blocking pieces
+			const Bitboard e4RookBlockedMagic = getRookAttacks(E4, blockedBoard);
+			const Bitboard e4RookBlockedDirect = generateRookAttacks(E4, blockedBoard);
+
+			success &= (e4RookBlockedMagic == e4RookBlockedDirect);
+			success &= (e4RookBlockedMagic & squareToBB(E2)) != 0; // Should include blocker
+			success &= (e4RookBlockedMagic & squareToBB(E1)) == 0; // Shouldn't go beyond blocker
+
+			report("Magic bitboard attack functions", success);
+		}
+
+		// Test the magic bitboard initialization process
+		void testMagicInitialization()
+		{
+
+			// Store original tables to restore after testing
+			const std::array<Magic, SQUARE_NB> origBishopMagics = g_bishopMagics;
+			const std::array<Magic, SQUARE_NB> origRookMagics = g_rookMagics;
+
+			// Initialize only a subset of squares to keep the test fast
+			constexpr std::array<Square, 4> testSquares = { A1, D4, E4, H8 };
+
+			bool success = true;
+
+			// Test initialization for bishop on a few squares
+			for (const Square sq : testSquares) {
+				// Clear the magic data for this square
+				g_bishopMagics.at(sq) = Magic{};
+
+				// Initialize just this one square's bishop
+				Magic& bishopMagic = g_bishopMagics.at(sq);
+				bishopMagic.mask = generateBishopMask(sq);
+				const int bits = popCount(bishopMagic.mask);
+				bishopMagic.shift = 64 - bits;
+
+				// Use a known working magic or find a new one
+				const MagicResult magicResult = findMagic(sq, BISHOP);
+				success &= magicResult.success;
+				bishopMagic.magic = magicResult.magic;
+
+				// Verify the magic number works by checking a few occupancy patterns
+				constexpr int testPatterns = 10;
+				const int step = (1 << bits) / testPatterns;
+
+				for (int i = 0; i < testPatterns; ++i) {
+					const Bitboard occ = setOccupancy(i * step, bits, bishopMagic.mask);
+					// This index calculation should not collide with other patterns
+					const unsigned int index = bishopMagic.getIndex(occ);
+					assert(index < (1ULL << bits));
+				}
+			}
+
+			// Test initialization for rook on a few squares
+			for (const Square sq : testSquares) {
+				// Clear the magic data for this square
+				g_rookMagics.at(sq) = Magic{};
+
+				// Initialize just this one square's rook
+				Magic& rookMagic = g_rookMagics.at(sq);
+				rookMagic.mask = generateRookMask(sq);
+				const int bits = popCount(rookMagic.mask);
+				rookMagic.shift = 64 - bits;
+
+				// Use a known working magic or find a new one
+				const MagicResult magicResult = findMagic(sq, ROOK);
+				success &= magicResult.success;
+				rookMagic.magic = magicResult.magic;
+
+				// Verify the magic number works by checking a few occupancy patterns
+				constexpr int testPatterns = 10;
+				const int step = (1 << bits) / testPatterns;
+
+				for (int i = 0; i < testPatterns; ++i) {
+					const Bitboard occ = setOccupancy(i * step, bits, rookMagic.mask);
+					// This index calculation should not collide with other patterns
+					const unsigned int index = rookMagic.getIndex(occ);
+					assert(index < (1ULL << bits));
+				}
+			}
+
+			// Restore original magic data
+			g_bishopMagics = origBishopMagics;
+			g_rookMagics = origRookMagics;
+
+			report("Magic bitboard initialization", success);
 		}
 
 		void runAllMagicBBTests() {
@@ -433,6 +562,8 @@ namespace chess {
 			testFindMagicEasy();
 			testMagicNumberGeneration();
 			testMagicNumberVerification();
+			testMagicAttackFunctions();
+			testMagicInitialization();
 			std::cout << "\nBitBoard MagicBB completed." << "\n";
 		}
 	}
