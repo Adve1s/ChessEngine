@@ -5,18 +5,15 @@
 #include "BitBoardTests.h"
 #include "MagicBB.h"
 #include "MagicBBTests.h"
+#include "Move.h"
+#include "MoveTests.h"
 
 
 int main()
 {
 	chess::init();
 	chess::initMagicBitboards();
-	chess::Bitboard ocup = 0;
-	setBit(ocup, chess::C3);
-	chess::printBitBoard(getBishopAttacks(chess::B2,ocup));
-	chess::printBitBoard(getRookAttacks(chess::A3, ocup));
-	chess::tests::runAllMagicBBTests();
-	chess::tests::runAllBitBoardTests();
+	chess::tests::runAllMoveTests();
 	return 0;
 }
 

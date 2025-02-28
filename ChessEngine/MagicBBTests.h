@@ -1,8 +1,6 @@
 #pragma once
-namespace chess {
-	namespace tests {
-		void runAllMagicBBTests();
-	} // namespace tests
-} // namespace chess
-
-
+namespace chess::tests
+{
+	void runAllMagicBBTests();
+	void testFindMagic();
+}

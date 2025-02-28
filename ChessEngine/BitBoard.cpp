@@ -33,12 +33,15 @@ namespace chess {
 	// Initialize between and through bitboards
 	void initBetweenThroughBB()
 	{
+		assert(insideBoard(A1, 1) && !insideBoard(A1, 27));
+		assert(distance<Square>(A1, A3) == 2);
+		assert(getDirection(A1, C3) == NORTH_EAST && getDirection(A1, C7) == 0);
 		// Helper to process rays from a square
 		auto processRayFromSquare = [](Square sq1, Square sq2, Direction d) {
 			Square temp = sq1;
 			while (const Bitboard next = insideBoard(temp, d)) {
 				g_throughBB.at(sq1).at(sq2) |= next;
-				temp = static_cast<Square>(temp + d);
+				temp = temp + d;
 			}
 			};
 		for (Square sq1 = A1; sq1 < SQUARE_NB; ++sq1) {
@@ -77,6 +80,8 @@ namespace chess {
 	// Initialize attack patterns for all pieces
 	void initAttackBB()
 	{
+		static_assert(fileOf(B2) == FILE_B && rankOf(B2) == RANK_2);
+		assert(insideBoard(A1, 1) && !insideBoard(A1, 27));
 		for (Square sq = A1; sq < SQUARE_NB; ++sq) {
 			const File f = fileOf(sq);
 			const Rank r = rankOf(sq);
@@ -113,6 +118,7 @@ namespace chess {
 	Bitboard insideBoard(const Square square, const int step)
 	{
 		assert(isSquare(square));
+		assert(distance<Square>(A1, A3) == 2);
 		const auto to = static_cast<Square>(square + step);
 		if (!isSquare(to)) {
 			return Bitboard{ 0 }; // Not a valid square
@@ -127,6 +133,7 @@ namespace chess {
 	Direction getDirection(const Square from,const Square to)
 	{
 		assert(isSquare(from) && isSquare(to));
+		static_assert(fileOf(B2) == FILE_B && rankOf(B2) == RANK_2);
 		const int fileDiff = fileOf(to) - fileOf(from);
 		const int rankDiff = rankOf(to) - rankOf(from);
 
@@ -179,6 +186,7 @@ namespace chess {
 	std::string squareToString(const Square square)
 	{
 		assert(isSquare(square));
+		static_assert(fileOf(B2) == FILE_B && rankOf(B2) == RANK_2);
 		const File file = fileOf(square);
 		const Rank rank = rankOf(square);
 

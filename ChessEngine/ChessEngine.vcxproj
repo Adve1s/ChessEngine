@@ -139,6 +139,7 @@
     <ClCompile Include="MagicBB.cpp" />
     <ClCompile Include="MagicBBTests.cpp" />
     <ClCompile Include="Move.cpp" />
+    <ClCompile Include="MoveTests.cpp" />
     <ClCompile Include="Position.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -146,8 +147,9 @@
     <ClInclude Include="BitBoardTests.h" />
     <ClInclude Include="MagicBB.h" />
     <ClInclude Include="MagicBBTests.h" />
-    <ClInclude Include="Types.h" />
     <ClInclude Include="Move.h" />
+    <ClInclude Include="MoveTests.h" />
+    <ClInclude Include="Types.h" />
     <ClInclude Include="Position.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

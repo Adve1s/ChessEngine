@@ -4,6 +4,7 @@
 // MagicBB.h - Magic bitboard implementation for fast sliding piece move generation
 
 namespace chess {
+
 	// Magic bitboard structure
 	struct Magic {
 		Bitboard mask = 0;      // Relevant occupancy mask for this square
@@ -29,6 +30,10 @@ namespace chess {
 	extern std::array<Bitboard, 0x19000> g_rookTable;     // Rook attacks lookup table
 	extern std::array<Bitboard, 0x1480> g_bishopTable;    // Bishop attacks lookup table
 
+	// Pre-calculated magic number arrays
+	extern const std::array<Bitboard, SQUARE_NB> BISHOP_MAGICS;
+	extern const std::array<Bitboard, SQUARE_NB> ROOK_MAGICS;
+
 	// Function declarations
 	void initMagics(PieceType piece);	// Initialize bishop or rook magics
 	void initMagicBitboards();  // Initialize all the magic bitboard tables
@@ -47,4 +52,5 @@ namespace chess {
 	Bitboard generateRookMask(Square sq);                       // Generate rook relevant squares mask
 	Bitboard generateBishopAttacks(Square sq, Bitboard occupied);  // Calculate bishop attacks directly
 	Bitboard generateRookAttacks(Square sq, Bitboard occupied);    // Calculate rook attacks directly
+
 }

@@ -49,6 +49,7 @@ namespace chess {
 	// Gets pawn attack pattern for specified color
 	template<Color C>
 	constexpr Bitboard pawnAttack(const Square square) {
+		assert(insideBoard(A1, 1) && !insideBoard(A1,27));
 		return C == WHITE ? insideBoard(square, NORTH_WEST) | insideBoard(square, NORTH_EAST)
 			: insideBoard(square, SOUTH_WEST) | insideBoard(square, SOUTH_EAST);
 	}
@@ -56,6 +57,7 @@ namespace chess {
 	// Distance is used to calculate distance between ranks, files or look up distance between squares
 	template<typename T>
 	int distance(const Square x, const Square y) noexcept {
+		static_assert(fileOf(B2) == FILE_B && rankOf(B2) == RANK_2);
 		if constexpr (std::is_same_v<T, File>) {
 			return abs(fileOf(x) - fileOf(y));
 		}
