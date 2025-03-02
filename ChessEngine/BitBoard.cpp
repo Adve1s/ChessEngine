@@ -13,12 +13,14 @@ namespace chess {
 	std::array<std::array<Bitboard, SQUARE_NB>, COLOR_NB> g_pawnAttacks;
 	std::array<std::array<uint8_t, SQUARE_NB>, SQUARE_NB> g_squareDistance;
 
-	// Initialize all lookup tables
-	void init()
-	{
-		initSquareDistance();
-		initBetweenThroughBB();
-		initAttackBB();
+	namespace bitboards {
+		// Initialize all lookup tables
+		void init()
+		{
+			initSquareDistance();
+			initBetweenThroughBB();
+			initAttackBB();
+		}
 	}
 
 	// Initialize distance lookup table
@@ -64,7 +66,7 @@ namespace chess {
 				Square temp = sq1;
 				for (int num = 0; num < dist - 1; ++num) {
 					g_betweenBB.at(sq1).at(sq2) |= insideBoard(temp, dirs.at(0));
-					temp = static_cast<Square>(temp + dirs.at(0));
+					temp = temp + dirs.at(0);
 				}
 				// Calculate rays through squares
 				for (const auto& d : dirs) {
@@ -94,7 +96,7 @@ namespace chess {
 				Square temp = sq;
 				while (const Bitboard next = insideBoard(temp, d)) {
 					g_pseudoAttacks.at(BISHOP).at(sq) |= next;
-					temp = static_cast<Square>(temp + d);
+					temp = temp + d;
 				}
 			}
 			// Queen = rook + bishop

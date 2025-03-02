@@ -6,6 +6,8 @@
 #include "Types.h"
 
 // Move.h - Compact chess move representation (16-bit)
+namespace chess
+{
 
 class Move {
 public:
@@ -14,35 +16,42 @@ public:
 
 	// Create a normal move from two squares
 	constexpr explicit Move(const uint16_t data) : m_data(data) {}
-	constexpr Move(const chess::Square from, const chess::Square to) :
+	constexpr Move(const Square from, const Square to) :
 		m_data(gsl::narrow_cast<uint16_t>(from | (to << 6))) {
+		assert(isSquare(from) && "Invalid from square");
+		assert(isSquare(to) && "Invalid to square");
 	}
 
 	// Static factory methods for special moves
-	constexpr Move(const chess::Square from, const chess::Square to, const chess::MoveType type,
-		const chess::PieceType promotionPiece = chess::KNIGHT) :
-		m_data(gsl::narrow_cast<uint16_t>(from | (to << 6) | ((promotionPiece - chess::KNIGHT) << 12) | type)) {
+	constexpr Move(const Square from, const Square to, const MoveType type,
+		const PieceType promotionPiece = KNIGHT) :
+		m_data(gsl::narrow_cast<uint16_t>(from | (to << 6) | ((promotionPiece - KNIGHT) << 12) | type)) {
+		assert(isSquare(from) && "Invalid from square");
+		assert(isSquare(to) && "Invalid to square");
+		assert((type != PROMOTION ||
+			(promotionPiece >= KNIGHT && promotionPiece <= QUEEN)) &&
+			"Invalid promotion piece");
 	}
 
 	// Accessor methods
-	[[nodiscard]] constexpr chess::Square fromSq() const {
-		return static_cast<chess::Square>(m_data & 0x3F);
+	[[nodiscard]] constexpr Square fromSq() const {
+		return static_cast<Square>(m_data & 0x3F);
 	}
 
-	[[nodiscard]] constexpr chess::Square toSq() const {
-		return static_cast<chess::Square>((m_data >> 6) & 0x3F);
+	[[nodiscard]] constexpr Square toSq() const {
+		return static_cast<Square>((m_data >> 6) & 0x3F);
 	}
 
 	[[nodiscard]] constexpr int fromToSq() const {
 		return m_data & 0xFFF;
 	}
 
-	[[nodiscard]] constexpr chess::MoveType moveType() const {
-		return static_cast<chess::MoveType>(m_data & (3 << 14));
+	[[nodiscard]] constexpr MoveType moveType() const {
+		return static_cast<MoveType>(m_data & (3 << 14));
 	}
 
-	[[nodiscard]] constexpr chess::PieceType promotionType() const {
-		return static_cast<chess::PieceType>(((m_data >> 12) & 3) + chess::KNIGHT);
+	[[nodiscard]] constexpr PieceType promotionType() const {
+		return static_cast<PieceType>(((m_data >> 12) & 3) + KNIGHT);
 	}
 
 	// Special move creation
@@ -81,3 +90,5 @@ struct MoveHash {
 		return m.raw(); // Simple hash using raw data
 	}
 };
+
+}

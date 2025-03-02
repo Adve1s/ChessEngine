@@ -10,6 +10,9 @@ namespace chess {
 	// 64-bit unsigned integer representing a chess board
 	using Bitboard = uint64_t;
 
+	// 64-bit hash value for positions
+	using HashKey = uint64_t;
+
 	// Piece types
 	enum PieceType : int
 	{
@@ -27,7 +30,7 @@ namespace chess {
 	// Pieces (combines piece type and color)
 	enum Piece : int
 	{
-		NO_PIECE = 8,      // = 0 (first enum value defaults to 0)
+		NO_PIECE = 0,      // = 0 (first enum value defaults to 0)
 
 		// White pieces start at PAWN's value (1)
 		W_PAWN = PAWN,		// = 1

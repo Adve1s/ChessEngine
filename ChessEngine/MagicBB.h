@@ -13,7 +13,7 @@ namespace chess {
 		int shift= 0;          // Shift amount for the index
 
 		// Calculate the attacks table index for a given occupancy
-		inline unsigned int getIndex(Bitboard occupied) const noexcept {
+		[[nodiscard]] unsigned int getIndex(const Bitboard occupied) const noexcept {
 			return gsl::narrow_cast<unsigned int>(((occupied & mask) * magic) >> shift);
 		}
 	};
@@ -36,8 +36,9 @@ namespace chess {
 
 	// Function declarations
 	void initMagics(PieceType piece);	// Initialize bishop or rook magics
-	void initMagicBitboards();  // Initialize all the magic bitboard tables
-
+	namespace magicBB {
+		void init();  // Initialize all the magic bitboard tables
+	}
 	// Get attacks for sliding pieces using magic bitboards
 	Bitboard getBishopAttacks(Square sq, Bitboard occupied);  // Bishop attacks
 	Bitboard getRookAttacks(Square sq, Bitboard occupied);    // Rook attacks

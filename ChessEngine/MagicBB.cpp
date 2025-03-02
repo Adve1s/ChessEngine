@@ -28,7 +28,7 @@ namespace chess {
 
 	// Generated Rook Magic Numbers
 	const std::array<Bitboard, SQUARE_NB> ROOK_MAGICS = {
-		0x2280004002201083ULL,    0x1280102000400880ULL,    0x1200200842008010ULL,    0x200042042001008ULL,    0x1200080410200201ULL,    0x100080100020400ULL,    0x200010400820008ULL,    0x18014210004C080ULL,
+		0x2280004002201083ULL,	  0x1280102000400880ULL,    0x1200200842008010ULL,    0x200042042001008ULL,    0x1200080410200201ULL,    0x100080100020400ULL,    0x200010400820008ULL,    0x18014210004C080ULL,
 		0xC408800040008020ULL,    0x11402010004002ULL,    0x710801008802000ULL,    0x4000800800801000ULL,    0x100800800800400ULL,    0x1012000804020011ULL,    0xE002002842002104ULL,    0x1C0800080007100ULL,
 		0x488002C00040E004ULL,    0x40002010002801ULL,    0x10002020040800ULL,    0x86120008402200ULL,    0x820050008010090ULL,    0x808002000400ULL,    0x4308040001221088ULL,    0x4020001008074ULL,
 		0x20800080204000ULL,    0x200040100040ULL,    0x42E0010100261040ULL,    0x2548000880801000ULL,    0xE000040080800800ULL,    0x8188040080020080ULL,    0x180D00400088241ULL,    0x10406200008401ULL,
@@ -37,12 +37,13 @@ namespace chess {
 		0x1004424800500ULL,    0x1220810200205200ULL,    0x500802000100080ULL,    0x30100408210100ULL,    0x8201900800850100ULL,    0x40E0044010200801ULL,    0x401001426000900ULL,    0x2421000082004100ULL,
 		0x81810013260042ULL,    0x88522801A004102ULL,    0x108402001100903ULL,    0x4001002190000409ULL,    0x5000410020801ULL,    0xA001001088402ULL,    0x40498100A4104ULL,    0x800040020408102ULL
 	};
-	void initMagicBitboards()
-	{
-		initMagics(BISHOP);
-		initMagics(ROOK);
+	namespace magicBB {
+		void init()
+		{
+			initMagics(BISHOP);
+			initMagics(ROOK);
+		}
 	}
-
 	// Initialize magic bitboards for a piece type
 	void initMagics(const PieceType piece)
 	{
@@ -184,7 +185,7 @@ namespace chess {
 	}
 
 	// Find a magic number for the given square and piece type
-	MagicResult findMagic(Square square, PieceType pieceType) {
+	MagicResult findMagic(const Square square, const PieceType pieceType) {
 		assert(isSquare(square) && "Invalid square");
 		assert(pieceType >= PieceType::PAWN && pieceType <= PieceType::KING && "Invalid piece type");
 		assert(popCount(squareToBB(A2)) == 1);
@@ -252,7 +253,7 @@ namespace chess {
 	}
 
 	// Gets bishop attacks for a square using magic bitboards
-	Bitboard getBishopAttacks(Square sq, Bitboard occupied) {
+	Bitboard getBishopAttacks(const Square sq, const Bitboard occupied) {
 		assert(isSquare(sq));
 		const Magic& magic = g_bishopMagics.at(sq);
 		// Get index from magic multiplication
@@ -260,7 +261,7 @@ namespace chess {
 		return magic.attacks[index];
 	}
 
-	Bitboard getRookAttacks(Square sq, Bitboard occupied) {
+	Bitboard getRookAttacks(const Square sq, const Bitboard occupied) {
 		assert(isSquare(sq));
 		const Magic& magic = g_rookMagics.at(sq);
 		// Get index from magic multiplication
@@ -269,7 +270,7 @@ namespace chess {
 	}
 
 	// Gets queen attacks (combination of bishop and rook attacks)
-	Bitboard getQueenAttacks(Square sq, Bitboard occupied) {
+	Bitboard getQueenAttacks(const Square sq, const Bitboard occupied) {
 		return getBishopAttacks(sq, occupied) | getRookAttacks(sq, occupied);
 	}
 }

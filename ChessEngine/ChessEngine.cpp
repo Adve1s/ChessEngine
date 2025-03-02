@@ -7,13 +7,16 @@
 #include "MagicBBTests.h"
 #include "Move.h"
 #include "MoveTests.h"
+#include "Position.h"
+#include "PositionTests.h"
 
 
 int main()
 {
-	chess::init();
-	chess::initMagicBitboards();
-	chess::tests::runAllMoveTests();
+	chess::bitboards::init();
+	chess::magicBB::init();
+	chess::Position::init();
+	chess::tests::runAllPositionTests();
 	return 0;
 }
 

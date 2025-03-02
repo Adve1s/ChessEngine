@@ -8,8 +8,11 @@
 
 namespace chess {
 
-	// Initialization functions
-	void init();
+	namespace bitboards {
+		// Initialization functions
+		void init();
+	}
+
 	void initSquareDistance();
 	void initBetweenThroughBB();
 	void initAttackBB();

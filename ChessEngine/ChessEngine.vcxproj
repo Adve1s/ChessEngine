@@ -110,6 +110,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <EnablePREfast>true</EnablePREfast>
+      <DisableSpecificWarnings>
+      </DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,6 +143,7 @@
     <ClCompile Include="Move.cpp" />
     <ClCompile Include="MoveTests.cpp" />
     <ClCompile Include="Position.cpp" />
+    <ClCompile Include="PositionTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BitBoard.h" />
@@ -151,6 +154,7 @@
     <ClInclude Include="MoveTests.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Position.h" />
+    <ClInclude Include="PositionTests.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

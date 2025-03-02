@@ -72,7 +72,7 @@ namespace chess::tests
 	// Test distance calculations
 	void testDistanceFunctions() {
 		// Initialize the distance tables
-		init();
+		bitboards::init();
 
 		bool success = true;
 
@@ -103,7 +103,7 @@ namespace chess::tests
 
 	// Test pawn attack patterns
 	void testPawnAttacks() {
-		init(); // Ensure attacks are initialized
+		bitboards::init(); // Ensure attacks are initialized
 
 		bool success = true;
 
@@ -127,7 +127,7 @@ namespace chess::tests
 
 	// Test knight attack patterns
 	void testKnightAttacks() {
-		init();
+		bitboards::init();
 
 		bool success = true;
 
@@ -157,7 +157,7 @@ namespace chess::tests
 
 	// Test king attack patterns
 	void testKingAttacks() {
-		init();
+		bitboards::init();
 
 		bool success = true;
 
@@ -190,7 +190,7 @@ namespace chess::tests
 
 	// Test sliding piece attack patterns
 	void testSlidingPieceAttacks() {
-		init();
+		bitboards::init();
 
 		// Test rook attacks
 		bool success = true;
@@ -234,7 +234,7 @@ namespace chess::tests
 
 	// Test between/through squares
 	void testBetweenAndThroughSquares() {
-		init();
+		bitboards::init();
 
 		bool success = true;
 
