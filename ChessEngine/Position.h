@@ -15,6 +15,38 @@ namespace chess {
 		extern HashKey g_noPawns;												// No pawns key
 	}
 
+	struct StateInfo {
+		// Hash keys for various aspects of the position
+		HashKey positionKey;    // Full position hash
+		HashKey materialKey;    // Material configuration hash
+		HashKey pawnKey;        // Pawn structure hash
+
+		// Material counting
+		std::array<Value, COLOR_NB> nonPawnMaterial;  // Total value of non-pawn pieces by color
+
+		// Check and pin information
+		Bitboard checkersBB;                // Pieces giving check
+		std::array <Bitboard, COLOR_NB> blockersForKing; // Pieces blocking attacks to kings
+		std::array <Bitboard, COLOR_NB> pinners;         // Enemy pieces pinning friendly pieces
+
+		// Game state variables
+		Color activeColor;           // Side to move
+		CastlingRights castlingRights; // Current castling availability
+		Square epSquare;             // En passant target square
+		int halfmoveClock;           // Halfmove clock for 50-move rule
+		int fullmoveNumber;          // Fullmove counter
+
+		// Previous move information
+		Piece capturedPiece;         // Piece captured in the last move
+		int repetition;              // Position repetition counter
+
+		// Linked list pointers
+		StateInfo* previous;
+
+		// Constructor declaration
+		StateInfo() noexcept;
+	};
+
 	class Position
 	{
 	public:
@@ -39,13 +71,8 @@ namespace chess {
 		std::array<Bitboard, CASTLING_RIGHT_NB> m_castlingPath{};
 
 		// Game state
-		Color m_activeColor = WHITE;                       // Side to move
-		CastlingRights m_castlingRights = NO_CASTLING;	   // Available castling options
-		Square m_enPassantSquare = NO_SQUARE;              // En passant target square if available
-
-		// Move counters
-		int m_halfmoveCount = 0;    // Halfmove clock (for 50-move rule)
-		int m_fullmoveCount = 1;    // Fullmove counter (starts at 1, incremented after Black's move)
+		StateInfo* m_state;
+		StateInfo m_startState;
 
 	};
 }

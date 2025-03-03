@@ -110,16 +110,6 @@ namespace chess {
 		RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NB
 	};
 
-	// Constants
-	constexpr int MAX_MOVES = 256;         // Maximum number of moves in a position
-	constexpr int MAX_GAME_LENGTH = 246;  // Maximum number of half-moves in a game
-
-	// Utility functions
-	constexpr bool isSquare(const Square s) { return s >= SQUARE_ZERO && s < NO_SQUARE;}
-	constexpr File fileOf(const Square sq) { assert(isSquare(sq)); return static_cast<File>(sq & 7); }
-	constexpr Rank rankOf(const Square sq) { assert(isSquare(sq)); return static_cast<Rank>(sq >> 3); }
-	constexpr Square makeSquare(const File f, const Rank r) { assert(f < FILE_NB && r < RANK_NB); return static_cast<Square>((r << 3) | f); }
-
 	// Castling rights (can be combined with bitwise OR)
 	enum CastlingRights : int
 	{
@@ -128,7 +118,7 @@ namespace chess {
 		WHITE_OOO = WHITE_OO << 1,						// 0010
 		BLACK_OO = WHITE_OO << 2,  						// 0100
 		BLACK_OOO = WHITE_OO << 3,						// 1000
-			
+
 		KING_SIDE = WHITE_OO | BLACK_OO,		        // 0101
 		QUEEN_SIDE = WHITE_OOO | BLACK_OOO,				// 1010
 		WHITE_CASTLING = WHITE_OO | WHITE_OOO,			// 0011
@@ -137,6 +127,38 @@ namespace chess {
 
 		CASTLING_RIGHT_NB = 16
 	};
+
+	// Constants
+	constexpr int MAX_MOVES = 256;         // Maximum number of moves in a position
+	constexpr int MAX_GAME_LENGTH = 246;  // Maximum number of half-moves in a game
+
+	using Value = int;  // Type alias for evaluation and material values
+
+	// Material values for pieces
+	constexpr Value PawnValue = 208;
+	constexpr Value KnightValue = 781;
+	constexpr Value BishopValue = 825;
+	constexpr Value RookValue = 1276;
+	constexpr Value QueenValue = 2538;
+	// We don't need a specific value for the king in material counting
+
+	// Special evaluation values
+	constexpr Value VALUE_ZERO = 0;
+	constexpr Value VALUE_DRAW = 0;
+	constexpr Value VALUE_NONE = 32002;
+	constexpr Value VALUE_INFINITE = 32001;
+	constexpr Value VALUE_MATE = 32000;
+	constexpr Value VALUE_MATE_IN_MAX_PLY = VALUE_MATE - MAX_GAME_LENGTH;
+	constexpr Value VALUE_MATED_IN_MAX_PLY = -VALUE_MATE_IN_MAX_PLY;
+
+	// Utility functions
+	constexpr bool isSquare(const Square s) { return s >= SQUARE_ZERO && s < NO_SQUARE;}
+	constexpr File fileOf(const Square sq) { assert(isSquare(sq)); return static_cast<File>(sq & 7); }
+	constexpr Rank rankOf(const Square sq) { assert(isSquare(sq)); return static_cast<Rank>(sq >> 3); }
+	constexpr Square makeSquare(const File f, const Rank r) { assert(f < FILE_NB && r < RANK_NB); return static_cast<Square>((r << 3) | f); }
+	constexpr PieceType typeOf(const Piece piece) {return static_cast<PieceType>(piece & 7);}
+	constexpr Color colorOf(const Piece piece) {assert(piece != NO_PIECE); return static_cast<Color>(piece >> 3);
+	}
 
 	// Operator overload
 	inline Square operator+(const Square sq,const Direction dir) noexcept{

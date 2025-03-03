@@ -10,13 +10,13 @@
 #include "Position.h"
 #include "PositionTests.h"
 
+using namespace chess;
 
 int main()
 {
-	chess::bitboards::init();
-	chess::magicBB::init();
-	chess::Position::init();
-	chess::tests::runAllPositionTests();
+	bitboards::init();
+	magicBB::init();
+	Position::init();
 	return 0;
 }
 
